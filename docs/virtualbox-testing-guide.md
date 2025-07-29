@@ -7,14 +7,16 @@ This guide provides **automated testing instructions** for the Arch Linux Hyprla
 **For impatient users who want immediate testing:**
 
 1. **Setup VM** (5 minutes):
+
    - Create VirtualBox VM with EFI enabled
    - Boot from Arch Linux ISO
    - VM will auto-connect to internet via NAT
 
 2. **Run Automation** (1 command):
+
    ```bash
    # Download and run automated VM testing
-   curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
+   curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
    chmod +x auto_vm_test.sh
    ./auto_vm_test.sh
    ```
@@ -35,12 +37,14 @@ For users who want to understand the testing process or need troubleshooting.
 ## Prerequisites
 
 ### Required Software
+
 - **VirtualBox** 7.0 or newer
 - **Arch Linux ISO** (latest release)
 - At least **8GB RAM** and **60GB disk space** for the VM
 - **Git** for cloning the repository
 
 ### Download Links
+
 - VirtualBox: https://www.virtualbox.org/wiki/Downloads
 - Arch Linux ISO: https://archlinux.org/download/
 
@@ -60,6 +64,7 @@ For users who want to understand the testing process or need troubleshooting.
 ### 1.2 VM Settings Configuration
 
 **System Settings:**
+
 ```bash
 # Motherboard Tab
 - Boot Order: Hard Disk, Optical, Network
@@ -73,6 +78,7 @@ For users who want to understand the testing process or need troubleshooting.
 ```
 
 **Display Settings:**
+
 ```bash
 # Screen Tab
 - Video Memory: 128 MB
@@ -81,6 +87,7 @@ For users who want to understand the testing process or need troubleshooting.
 ```
 
 **Network Settings:**
+
 ```bash
 # Adapter 1
 - Enable Network Adapter: ✓
@@ -89,6 +96,7 @@ For users who want to understand the testing process or need troubleshooting.
 ```
 
 **Storage Settings:**
+
 ```bash
 # Add Arch Linux ISO to optical drive
 - Controller: IDE → Add Optical Drive
@@ -100,13 +108,13 @@ For users who want to understand the testing process or need troubleshooting.
 ### 2.1 Boot from ISO and Run Automation
 
 1. Start the VM
-2. Select "Arch Linux install medium" from boot menu  
+2. Select "Arch Linux install medium" from boot menu
 3. Wait for the live environment to load
 4. **Run the automated testing script:**
 
 ```bash
 # Download and execute automated VM testing
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
+curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
 chmod +x auto_vm_test.sh
 
 # Run automated testing (handles everything)
@@ -114,8 +122,9 @@ chmod +x auto_vm_test.sh
 ```
 
 **The script automatically handles:**
+
 - ✅ Network connectivity verification
-- ✅ Disk partitioning and encryption  
+- ✅ Disk partitioning and encryption
 - ✅ Base system installation
 - ✅ Bootloader configuration
 - ✅ User setup
@@ -310,7 +319,7 @@ The automation script handles **all deployment phases automatically**. You don't
 After the VM reboots from base installation, the automation script **automatically continues** with:
 
 - ✅ **Desktop Deployment** - Complete Hyprland environment
-- ✅ **Security Hardening** - UFW, fail2ban, audit configuration  
+- ✅ **Security Hardening** - UFW, fail2ban, audit configuration
 - ✅ **Application Installation** - All AUR packages and tools
 - ✅ **VirtualBox Optimizations** - Guest additions and VM-specific settings
 - ✅ **Validation Testing** - Comprehensive system verification
@@ -329,8 +338,9 @@ tail -f /var/log/auto_vm_test.log
 ### 3.3 Completion Indicators
 
 The automation is complete when you see:
+
 - ✅ SDDM login screen appears
-- ✅ System report generated at `~/vm_test_report.txt`  
+- ✅ System report generated at `~/vm_test_report.txt`
 - ✅ No errors in automation log
 - ✅ All services running correctly
 
@@ -348,19 +358,19 @@ cat ~/vm_test_report.txt
 # ========================
 # VirtualBox Test Results Report
 # Generated on: 2025-01-19
-# 
+#
 # TEST ENVIRONMENT
 # ================
 # VM Detection: true
 # Memory: 8GB
 # Disk: 60GB
-# 
+#
 # INSTALLATION STATUS
 # ===================
 # Base System: ✓ Completed
-# Desktop Environment: ✓ Installed  
+# Desktop Environment: ✓ Installed
 # Security Hardening: ✓ Active
-# 
+#
 # DESKTOP COMPONENTS
 # ==================
 # Hyprland: ✓
@@ -368,7 +378,7 @@ cat ~/vm_test_report.txt
 # Wofi: ✓
 # Kitty: ✓
 # SDDM: ✓
-# 
+#
 # Overall Status: ✓ PASSED
 ```
 
@@ -384,6 +394,7 @@ After automation completes, test the desktop manually:
 ### 5.2 Desktop Environment Tests
 
 **Test Hyprland Components:**
+
 ```bash
 # Test key bindings:
 Super + T          # Terminal (Kitty)
@@ -441,6 +452,7 @@ sudo /usr/local/bin/audit-analysis
 ### 6.1 Boot Issues
 
 **Black screen after reboot:**
+
 ```bash
 # Boot from Arch ISO, mount encrypted partition, and chroot
 cryptsetup open /dev/sda2 cryptroot
@@ -454,6 +466,7 @@ cat /boot/loader/entries/arch.conf
 ```
 
 **SDDM not starting:**
+
 ```bash
 # Check SDDM status
 sudo systemctl status sddm
@@ -466,6 +479,7 @@ sudo systemctl start sddm
 ### 6.2 Desktop Environment Issues
 
 **Hyprland won't start:**
+
 ```bash
 # Check if Hyprland is installed
 which Hyprland
@@ -478,6 +492,7 @@ journalctl --user -u hyprland
 ```
 
 **No audio:**
+
 ```bash
 # Check PipeWire services
 systemctl --user status pipewire
@@ -491,6 +506,7 @@ systemctl --user restart wireplumber
 ### 6.3 Network Issues
 
 **No internet connection:**
+
 ```bash
 # Check NetworkManager
 sudo systemctl status NetworkManager
@@ -504,6 +520,7 @@ nmcli connection show
 ### 6.4 Ansible Issues
 
 **Playbook fails:**
+
 ```bash
 # Run with verbose output
 ansible-playbook -vvv -i configs/ansible/inventory/localhost.yml local.yml
@@ -579,21 +596,25 @@ systemd-analyze critical-chain
 ## Next Steps After Successful VM Testing
 
 ### 1. Document Issues Found
+
 - Create a list of any issues encountered
 - Note workarounds or fixes applied
 - Update automation scripts if needed
 
 ### 2. Prepare for Production Deployment
+
 - Backup your work laptop
 - Ensure you have recovery options
 - Plan deployment timing
 
 ### 3. Production Deployment
+
 - Create Arch Linux installation USB
 - Follow the same process on actual hardware
 - Deploy automation system
 
 ### 4. Post-Deployment
+
 - Run security audits
 - Configure additional applications
 - Set up backup routines
@@ -602,12 +623,14 @@ systemd-analyze critical-chain
 ## Support and Resources
 
 ### Log Locations
+
 - Ansible logs: `/var/log/ansible/`
 - System logs: `journalctl`
 - SDDM logs: `journalctl -u sddm`
 - Hyprland logs: `journalctl --user`
 
 ### Useful Commands
+
 ```bash
 # Makefile targets for maintenance
 make status          # Check system status

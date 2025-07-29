@@ -12,8 +12,8 @@ source "$SCRIPT_DIR/../internal/common.sh" || {
 }
 
 # Configuration
-CONFIG_FILE="${CONFIG_FILE:-$HOME/lm_archlinux_desktop/deployment_config.yml}"
-INSTALL_DIR="$HOME/lm_archlinux_desktop"
+CONFIG_FILE="${CONFIG_FILE:-$HOME/lm-archlinux-desktop/deployment_config.yml}"
+INSTALL_DIR="$HOME/lm-archlinux-desktop"
 
 # Legacy error function that exits (keep for compatibility)
 error() {

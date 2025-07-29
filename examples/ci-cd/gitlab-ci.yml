@@ -10,7 +10,7 @@ variables:
   # Deployment configuration
   ANSIBLE_HOST_KEY_CHECKING: "false"
   ANSIBLE_STDOUT_CALLBACK: "yaml"
-  DEPLOYMENT_TIMEOUT: "3600"  # 1 hour timeout
+  DEPLOYMENT_TIMEOUT: "3600" # 1 hour timeout
 
 # Validation stage
 validate_secrets:
@@ -20,42 +20,42 @@ validate_secrets:
     - apk add --no-cache bash curl
   script:
     - echo "🔐 Validating password secrets configuration..."
-    
+
     # Check required secrets
     - |
       if [[ -z "$DEPLOY_USER_PASSWORD" ]]; then
         echo "❌ DEPLOY_USER_PASSWORD variable not configured"
         exit 1
       fi
-      
+
     - |
       if [[ -z "$DEPLOY_ROOT_PASSWORD" ]]; then
         echo "❌ DEPLOY_ROOT_PASSWORD variable not configured"
         exit 1
       fi
-      
+
     # Password strength validation
     - |
       if [[ ${#DEPLOY_USER_PASSWORD} -lt 8 ]]; then
         echo "❌ User password must be at least 8 characters"
         exit 1
       fi
-      
+
     - |
       if [[ ${#DEPLOY_ROOT_PASSWORD} -lt 8 ]]; then
         echo "❌ Root password must be at least 8 characters"
         exit 1
       fi
-      
+
     # Check encryption requirements
     - |
       if [[ "$ENABLE_ENCRYPTION" == "true" ]] && [[ -z "$DEPLOY_LUKS_PASSPHRASE" ]]; then
         echo "❌ DEPLOY_LUKS_PASSPHRASE required when encryption is enabled"
         exit 1
       fi
-      
+
     - echo "✅ All password secrets validated successfully"
-    
+
   only:
     - main
     - develop
@@ -66,34 +66,34 @@ deploy_arch_linux:
   stage: deploy
   image: archlinux:latest
   timeout: 1h
-  
+
   before_script:
     - echo "🔧 Setting up deployment environment..."
     - pacman -Sy --noconfirm curl bash
-    
+
   script:
     - echo "📥 Downloading zero-touch deployment script..."
-    - git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git && cd lm_archlinux_desktop
+    - git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
     - chmod +x scripts/deploy.sh
-    
+
     - echo "🔍 Validating deployment script..."
     - ./scripts/deploy.sh help | head -10
-    
+
     - echo "🚀 Starting Arch Linux Hyprland deployment..."
     - echo "Project: $CI_PROJECT_NAME"
     - echo "Branch: $CI_COMMIT_REF_NAME"
     - echo "Commit: $CI_COMMIT_SHA"
     - echo "Pipeline: $CI_PIPELINE_ID"
-    
+
     # Run deployment with environment variables
     - ./scripts/deploy.sh full --password env
-    
+
   after_script:
     - echo "🔐 Performing security cleanup..."
     # Clear any temporary files
     - find /tmp -name "*password*" -type f -delete 2>/dev/null || true
     - find /tmp -name "*deploy*" -type f -delete 2>/dev/null || true
-    
+
   artifacts:
     when: always
     paths:
@@ -102,12 +102,12 @@ deploy_arch_linux:
     expire_in: 30 days
     reports:
       junit: "deployment_results.xml"
-      
+
   only:
     - main
     - develop
     - /^release\/.*$/
-    
+
   # Allow manual deployment for other branches
   when: manual
   except:
@@ -120,10 +120,10 @@ notify_completion:
   image: alpine:latest
   dependencies:
     - deploy_arch_linux
-    
+
   before_script:
     - apk add --no-cache curl jq
-    
+
   script:
     - |
       if [[ "$CI_JOB_STATUS" == "success" ]]; then
@@ -151,7 +151,7 @@ notify_completion:
             "$SLACK_WEBHOOK_URL"
         fi
       fi
-      
+
   when: always
   only:
     - main
@@ -162,17 +162,17 @@ notify_completion:
 deploy_custom:
   stage: deploy
   image: archlinux:latest
-  
+
   script:
     - echo "🎯 Custom deployment with parameters:"
     - echo "Target Environment: $TARGET_ENVIRONMENT"
     - echo "Enable Encryption: $ENABLE_ENCRYPTION"
     - echo "Custom Configuration: $CUSTOM_CONFIG"
-    
+
     # Download and run deployment
-    - git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git && cd lm_archlinux_desktop
+    - git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
     - chmod +x scripts/deploy.sh
-    
+
     # Apply custom configuration if provided
     - |
       if [[ -n "$CUSTOM_CONFIG" ]]; then
@@ -180,9 +180,9 @@ deploy_custom:
         echo "$CUSTOM_CONFIG" | base64 -d > custom_config.yml
         export CONFIG_FILE="./custom_config.yml"
       fi
-      
+
     - ./scripts/deploy.sh full --password env
-    
+
   when: manual
   allow_failure: false
 
@@ -192,7 +192,7 @@ deploy_custom:
   image: archlinux:latest
   script:
     - echo "🌍 Deploying to environment: $DEPLOYMENT_ENVIRONMENT"
-    - git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git && cd lm_archlinux_desktop
+    - git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
     - chmod +x scripts/deploy.sh
     - ./scripts/deploy.sh full --password env
   artifacts:
@@ -241,27 +241,26 @@ security_scan:
     - apk add --no-cache bash git
   script:
     - echo "🔍 Running security checks..."
-    
+
     # Check for secrets in code
     - |
       if git log --oneline | grep -i "password\|secret\|key" | grep -v "password-management\|examples"; then
         echo "⚠️  Found potential secrets in commit messages"
       fi
-      
+
     # Validate configuration files
     - |
       if find . -name "*.yml" -o -name "*.yaml" | xargs grep -l "password.*:" | grep -v examples; then
         echo "⚠️  Found potential passwords in configuration files"
       fi
-      
+
     - echo "✅ Security scan completed"
-    
+
   allow_failure: true
   only:
     - merge_requests
     - main
     - develop
-
 # Required GitLab CI/CD Variables:
 # Settings > CI/CD > Variables
 #

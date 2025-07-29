@@ -70,6 +70,7 @@ Our **comprehensive VirtualBox-based testing platform** ensures reliable automat
 - **📚 Complete Documentation** - Step-by-step testing guide with troubleshooting
 
 **Why VirtualBox Testing?**
+
 - **Safety** - Test without affecting your main system
 - **Reliability** - Consistent, reproducible test environment
 - **Automation** - Fully automated testing from ISO to desktop
@@ -162,27 +163,30 @@ Simplified development approach for maximum productivity:
 ### 🎯 **Super Simple 3-Step Process**
 
 #### Step 1: Download Bootstrap Files
+
 ```bash
 # Download the bootstrap script and configuration
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
 chmod +x bootstrap.sh
 ```
 
 #### Step 2: Edit Configuration
+
 ```bash
 # Edit the configuration file with your preferences
 nano bootstrap.conf
 
 # Key settings to customize:
 # - HOSTNAME=phoenix          # Your computer name
-# - USERNAME=lyeosmaouli      # Your username  
+# - USERNAME=lyeosmaouli      # Your username
 # - PROFILE=work              # work/personal/development
 # - TIMEZONE=Europe/Paris     # Your timezone
 # - KEYMAP=fr                # Your keyboard layout
 ```
 
 #### Step 3: Run Deployment
+
 ```bash
 # For VirtualBox testing (recommended first):
 ./bootstrap.sh testing
@@ -196,6 +200,7 @@ nano bootstrap.conf
 ```
 
 **That's it!** The bootstrap script handles everything:
+
 - ✅ Downloads and verifies the complete repository
 - ✅ Validates system requirements and network connectivity
 - ✅ Installs dependencies automatically
@@ -213,8 +218,8 @@ Test safely in a VM before deploying to your main system:
 #    - Boot from Arch Linux ISO
 
 # 2. Download and run bootstrap:
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
 chmod +x bootstrap.sh
 
 # 3. Edit configuration for testing:
@@ -227,7 +232,7 @@ nano bootstrap.conf  # Set VM_MEMORY=8192, VM_OPTIMIZATION=true
 # - Network setup and validation
 # - Repository download and verification
 # - Complete system installation
-# - Desktop environment deployment  
+# - Desktop environment deployment
 # - Security hardening
 # - Comprehensive test report generation
 ```
@@ -238,8 +243,8 @@ For developers who want to modify the automation:
 
 ```bash
 # Clone repository for development
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Install development dependencies (Arch Linux)
 sudo pacman -S ansible python python-pip git shellcheck
@@ -248,7 +253,7 @@ ansible-galaxy install -r configs/ansible/requirements.yml
 
 # Run development commands
 make dev-setup    # Setup development tools
-make lint         # Check code quality  
+make lint         # Check code quality
 make vm-test      # VirtualBox testing guide
 ```
 
