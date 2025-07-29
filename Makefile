@@ -1,7 +1,7 @@
 # Makefile for Arch Linux Hyprland Desktop Automation
 # Simplified for direct development workflow
 
-.PHONY: help install bootstrap desktop security maintenance test lint clean dev-setup status backup vm-test
+.PHONY: help install bootstrap desktop security maintenance test lint clean dev-setup status backup vm-test config-generate config-validate config-clean
 
 # Default target
 help:
@@ -9,14 +9,25 @@ help:
 	@echo "======================================"
 	@echo ""
 	@echo "Available targets:"
+	@echo ""
+	@echo "Configuration Management:"
+	@echo "  config-generate  - Generate all config files from master config"
+	@echo "  config-validate  - Validate master configuration"
+	@echo "  config-clean     - Remove all generated config files"
+	@echo ""
+	@echo "Installation & Deployment:"
 	@echo "  install     - Install Ansible and dependencies"
 	@echo "  bootstrap   - Run initial system setup"
 	@echo "  desktop     - Install Hyprland desktop environment"
 	@echo "  security    - Apply security hardening"
 	@echo "  maintenance - Run system maintenance tasks"
+	@echo ""
+	@echo "Testing & Quality:"
 	@echo "  test        - Run validation tests"
 	@echo "  vm-test     - Run VirtualBox testing (primary method)"
 	@echo "  lint        - Run code quality checks"
+	@echo ""
+	@echo "Development & Maintenance:"
 	@echo "  dev-setup   - Setup development environment"
 	@echo "  status      - Check system status"
 	@echo "  backup      - Backup configurations"
@@ -111,3 +122,16 @@ backup:
 	@mkdir -p backup/$(shell date +%Y%m%d_%H%M%S)
 	@cp -r configs backup/$(shell date +%Y%m%d_%H%M%S)/
 	@echo "Backup created in backup/$(shell date +%Y%m%d_%H%M%S)/"
+
+# Configuration management targets
+config-generate:
+	@echo "Generating all configuration files from master config..."
+	@./scripts/utils/config_manager.sh generate
+
+config-validate:
+	@echo "Validating master configuration..."
+	@./scripts/utils/config_manager.sh validate
+
+config-clean:
+	@echo "Removing all generated configuration files..."
+	@./scripts/utils/config_manager.sh clean
