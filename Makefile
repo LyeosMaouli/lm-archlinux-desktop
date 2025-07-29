@@ -11,9 +11,13 @@ help:
 	@echo "Available targets:"
 	@echo ""
 	@echo "Configuration Management:"
-	@echo "  config-generate  - Generate all config files from master config"
-	@echo "  config-validate  - Validate master configuration"
-	@echo "  config-clean     - Remove all generated config files"
+	@echo "  config-validate          - Validate both bootstrap and deployment configs"
+	@echo "  config-validate-bootstrap - Validate bootstrap configuration only"
+	@echo "  config-validate-deploy   - Validate deployment configuration only"
+	@echo "  config-sync              - Sync common settings between configs"
+	@echo "  config-generate-profiles - Generate profile-specific configs"
+	@echo "  config-clean             - Remove generated config files"
+	@echo "  config-check             - Check configuration consistency"
 	@echo ""
 	@echo "Installation & Deployment:"
 	@echo "  install     - Install Ansible and dependencies"
@@ -124,14 +128,30 @@ backup:
 	@echo "Backup created in backup/$(shell date +%Y%m%d_%H%M%S)/"
 
 # Configuration management targets
-config-generate:
-	@echo "Generating all configuration files from master config..."
-	@./scripts/utils/config_manager.sh generate
-
 config-validate:
-	@echo "Validating master configuration..."
-	@./scripts/utils/config_manager.sh validate
+	@echo "Validating configuration files..."
+	@./scripts/utils/config_manager.sh validate-all
+
+config-validate-bootstrap:
+	@echo "Validating bootstrap configuration..."
+	@./scripts/utils/config_manager.sh validate-bootstrap
+
+config-validate-deploy:
+	@echo "Validating deployment configuration..."
+	@./scripts/utils/config_manager.sh validate-deploy
+
+config-sync:
+	@echo "Syncing common settings between configurations..."
+	@./scripts/utils/config_manager.sh sync-settings
+
+config-generate-profiles:
+	@echo "Generating profile-specific configuration files..."
+	@./scripts/utils/config_manager.sh generate-profiles
 
 config-clean:
-	@echo "Removing all generated configuration files..."
-	@./scripts/utils/config_manager.sh clean
+	@echo "Cleaning generated configuration files..."
+	@./scripts/utils/config_manager.sh clean-generated
+
+config-check:
+	@echo "Checking configuration consistency..."
+	@./scripts/utils/config_manager.sh check-consistency
