@@ -88,7 +88,7 @@ validate_bootstrap_config() {
     
     # Check required bootstrap fields
     local required_fields=(
-        "REPO_URL" "BRANCH" "HOSTNAME" "USERNAME" "PROFILE"
+        "REPO_URL" "BRANCH" "HOSTNAME" "USER_NAME" "PROFILE"
     )
     
     for field in "${required_fields[@]}"; do
@@ -117,8 +117,8 @@ validate_bootstrap_config() {
     fi
     
     # Validate username format
-    if [[ -n "${USERNAME:-}" ]] && [[ ! "${USERNAME}" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
-        log_error "Invalid USERNAME format: ${USERNAME}. Must start with lowercase letter or underscore"
+    if [[ -n "${USER_NAME:-}" ]] && [[ ! "${USER_NAME}" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+        log_error "Invalid USER_NAME format: ${USER_NAME}. Must start with lowercase letter or underscore"
         ((errors++))
     fi
     
@@ -211,7 +211,7 @@ sync_common_settings() {
     
     # Store bootstrap values
     local bootstrap_hostname="${HOSTNAME:-}"
-    local bootstrap_username="${USERNAME:-}"
+    local bootstrap_username="${USER_NAME:-}"
     local bootstrap_profile="${PROFILE:-}"
     
     # Create backup of deploy config
@@ -478,7 +478,7 @@ check_consistency() {
     done < "$DEPLOY_CONFIG"
     
     # Check for common variables that might be duplicated
-    local common_vars=("HOSTNAME" "USERNAME" "PROFILE")
+    local common_vars=("HOSTNAME" "USER_NAME" "PROFILE")
     local inconsistencies=0
     
     for var in "${common_vars[@]}"; do
