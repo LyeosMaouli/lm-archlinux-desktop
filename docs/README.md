@@ -93,8 +93,8 @@ This documentation now covers the **latest enhancements** including:
 # VSCode DevContainers (Recommended for developers)
 # 1. Install VSCode and Dev Containers extension
 # 2. Clone and open in VSCode
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-code lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+code lm-archlinux-desktop
 # 3. Reopen in Container (Ctrl+Shift+P -> "Dev Containers: Reopen in Container")
 
 # Docker Compose development
@@ -107,7 +107,7 @@ dev-deploy --dry-run full      # Test deployment with monitoring
 
 ```bash
 # Fully automated installation
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git && cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
 ./scripts/deploy.sh full
 ```
 
@@ -119,7 +119,7 @@ docker compose --profile testing up test
 docker compose exec test ./scripts/testing/test_installation.sh
 
 # VirtualBox testing
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o vm_test.sh
+curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh -o vm_test.sh
 chmod +x vm_test.sh
 ./vm_test.sh
 ```

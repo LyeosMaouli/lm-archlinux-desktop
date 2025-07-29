@@ -18,7 +18,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-DEFAULT_REPO_URL="https://github.com/LyeosMaouli/lm_archlinux_desktop.git"
+DEFAULT_REPO_URL="https://github.com/LyeosMaouli/lm-archlinux-desktop.git"
 DEFAULT_BRANCH="main"
 WORK_DIR="/tmp/arch_automation_$$"
 CONFIG_FILE="bootstrap.conf"
@@ -193,7 +193,7 @@ create_default_config() {
 # Edit these values according to your preferences
 
 # Repository Settings
-REPO_URL=https://github.com/LyeosMaouli/lm_archlinux_desktop.git
+REPO_URL=https://github.com/LyeosMaouli/lm-archlinux-desktop.git
 BRANCH=main
 
 # System Configuration

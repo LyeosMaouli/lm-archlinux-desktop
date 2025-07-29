@@ -5,6 +5,7 @@
 ## 🎯 New Simplified Interface
 
 ### Single Command Deployment
+
 ```bash
 # Complete end-to-end deployment with automatic dependency installation
 ./scripts/deploy.sh full
@@ -22,6 +23,7 @@
 ```
 
 ### Latest Revolutionary Improvements
+
 - ✅ **Auto-Dependency Installation**: Missing packages (ansible, cryptsetup, parted) installed automatically
 - ✅ **Centralized Configuration**: Single `config/deploy.conf` file replaces scattered settings
 - ✅ **Intelligent Path Resolution**: Works seamlessly from USB, local, or CI/CD environments
@@ -32,17 +34,20 @@
 ## ✨ Revolutionary Features Overview
 
 ### 🔒 **Advanced Password Management System**
+
 - **4 Secure Methods**: Environment variables, encrypted files (AES-256), auto-generation, interactive
 - **Enterprise CI/CD Integration**: GitHub Actions workflows with secure password storage
 - **Email & QR Delivery**: Multiple password delivery methods
 - **PBKDF2 Encryption**: Military-grade security for password files
 
-### 📱 **USB Deployment System** *(GAME CHANGER)*
+### 📱 **USB Deployment System** _(GAME CHANGER)_
+
 - **Zero Console Typing**: Edit config on your main PC, deploy with zero typing errors
 - **Pre-configured Scripts**: All settings configured before deployment
 - **Error-Free Deployment**: Eliminates human error in manual command entry
 
 ### 🌟 **Zero-Touch Installation**
+
 - ✅ **Advanced Password Management**: 4 secure password methods with encryption
 - ✅ **USB Deployment**: No typing errors, pre-configured settings
 - ✅ **Auto-detects Everything**: Timezone, keyboard, hardware, best mirrors
@@ -56,6 +61,7 @@
 This revolutionary automation system transforms a minimal Arch Linux installation into a fully-configured Hyprland desktop environment with:
 
 ### 🖥️ **Desktop Environment**
+
 - **Hyprland** - Modern Wayland compositor with intelligent tiling
 - **Waybar** - Highly customizable status bar
 - **Wofi** - Application launcher with search
@@ -64,6 +70,7 @@ This revolutionary automation system transforms a minimal Arch Linux installatio
 - **SDDM** - Display manager with Wayland support
 
 ### 🔒 **Enterprise Security**
+
 - **UFW Firewall** - Configured with restrictive defaults
 - **fail2ban** - Intrusion prevention system
 - **Audit System** - Comprehensive security logging
@@ -72,6 +79,7 @@ This revolutionary automation system transforms a minimal Arch Linux installatio
 - **SSH Hardening** - Secure remote access
 
 ### 📦 **Applications & Tools**
+
 - **Visual Studio Code** - Modern development environment
 - **Firefox** - Secure web browser
 - **Discord, Zoom** - Communication tools
@@ -79,6 +87,7 @@ This revolutionary automation system transforms a minimal Arch Linux installatio
 - **System Tools** - Hardware validation, backup management
 
 ### ⚡ **Performance & Power**
+
 - **PipeWire** - Low-latency audio system
 - **TLP** - Advanced laptop power management
 - **Intel GPU Optimization** - Hardware-specific tuning
@@ -87,6 +96,7 @@ This revolutionary automation system transforms a minimal Arch Linux installatio
 ## 🔧 Configuration Setup
 
 ### Centralized Configuration System
+
 All system settings are now managed through a single configuration file:
 
 ```bash
@@ -95,13 +105,14 @@ nano config/deploy.conf
 
 # Key settings to customize:
 USER_NAME="yourusername"           # Your primary user account
-HOSTNAME="your-hostname"           # System hostname  
+HOSTNAME="your-hostname"           # System hostname
 PASSWORD_MODE="generate"           # Password handling method
 PROFILE="work"                     # Deployment profile (work/personal/development)
 ENCRYPTION_ENABLED=true           # Enable disk encryption
 ```
 
 ### Configuration Examples
+
 ```bash
 # Copy example configuration with sample settings
 cp config/example.deploy.conf config/deploy.conf
@@ -114,6 +125,7 @@ cp config/example.deploy.conf config/deploy.conf
 ## Prerequisites
 
 ### Hardware Requirements
+
 - **Target**: Work laptop with Intel GPU
 - **RAM**: Minimum 8GB (16GB recommended)
 - **Storage**: 60GB available space
@@ -121,6 +133,7 @@ cp config/example.deploy.conf config/deploy.conf
 - **Dependencies**: Automatically installed (ansible, cryptsetup, parted)
 
 ### Software Requirements
+
 - Arch Linux ISO (latest)
 - USB drive (8GB minimum)
 - Network credentials (WiFi SSID/password if needed)
@@ -130,18 +143,23 @@ cp config/example.deploy.conf config/deploy.conf
 ## Installation Methods
 
 ### Method 1: 📱 USB Deployment (🔥 GAME CHANGER)
+
 **Zero typing errors!** Edit config on main PC, deploy with no console typing.
 
 ### Method 2: 🌟 Zero-Touch Installation (EASIEST)
+
 **3 questions = Complete desktop!** Ultimate simplicity with auto-detection.
 
 ### Method 3: 🤖 Enterprise CI/CD Deployment
+
 **GitHub Secrets integration** for automated remote deployment.
 
 ### Method 4: ⚡ Advanced Password Management
+
 **4 secure methods** - Environment variables, encrypted files, auto-generation, interactive.
 
 ### Method 5: 🔧 Traditional Manual
+
 Step-by-step installation for troubleshooting and learning.
 
 ---
@@ -151,6 +169,7 @@ Step-by-step installation for troubleshooting and learning.
 **🔥 GAME CHANGER**: Edit settings on your main computer, deploy with ZERO typing errors!
 
 ### Step 1: Prepare USB Deployment System
+
 ```bash
 # 1. Download usb-deployment folder to USB stick
 # 2. Edit usb-deploy.sh configuration section with your preferences:
@@ -171,8 +190,10 @@ WIFI_PASSWORD="wifi_password"  # Optional
 ```
 
 ### Step 2: Deploy on Target Computer
+
 1. **Boot from Arch Linux ISO**
 2. **Mount USB and run:**
+
 ```bash
 # Mount USB drive
 mount /dev/sdX1 /mnt/usb
@@ -185,6 +206,7 @@ cd /mnt/usb
 3. **That's it!** No typing, no errors, complete automation!
 
 ### Benefits:
+
 - ✅ **Zero typing errors** - All commands pre-configured
 - ✅ **Pre-configured settings** - Edit comfortably on main PC
 - ✅ **No memorization** - No need to remember long commands
@@ -198,6 +220,7 @@ cd /mnt/usb
 **The ultimate in simplicity** - Answer 3 questions, get a complete desktop!
 
 ### Step 1: Prepare Installation Media
+
 ```bash
 # Download latest Arch Linux ISO
 curl -O https://mirror.rackspace.com/archlinux/iso/latest/archlinux-x86_64.iso
@@ -209,26 +232,29 @@ sudo dd if=archlinux-x86_64.iso of=/dev/sdX bs=4M status=progress oflag=sync
 ```
 
 ### Step 2: Boot and Deploy
+
 1. **Boot from USB** - Select "Arch Linux install medium"
 2. **Clone repository and run unified deployment:**
 
 ```bash
 # Clone the repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Run complete deployment with new unified interface
 ./scripts/deploy.sh full
 ```
 
 3. **Answer 3 simple questions:**
+
    - 👤 Your username
-   - 💻 Computer name  
+   - 💻 Computer name
    - 🔒 Enable encryption? (Y/n)
 
 4. **Sit back and relax!** ☕
 
 ### What Happens Automatically:
+
 - ✅ **Auto-detects**: Timezone, keyboard layout, best disk, fastest mirrors
 - ✅ **Smart networking**: Ethernet auto-connects, WiFi menu if needed
 - ✅ **Advanced password management**: Secure password generation with multiple delivery options
@@ -245,6 +271,7 @@ cd lm_archlinux_desktop
 **Perfect for enterprise environments and remote deployment:**
 
 ### GitHub Secrets Integration
+
 ```bash
 # Store passwords securely in GitHub repository secrets:
 # DEPLOY_USER_PASSWORD
@@ -259,6 +286,7 @@ export DEPLOY_ROOT_PASSWORD="secure_password"
 ```
 
 ### GitHub Actions Workflow
+
 See `examples/ci-cd/github-actions.yml` for complete CI/CD pipeline setup.
 
 **For complete setup guide:** [GitHub Password Storage](github-password-storage.md)
@@ -270,6 +298,7 @@ See `examples/ci-cd/github-actions.yml` for complete CI/CD pipeline setup.
 **Choose from 4 secure password methods:**
 
 ### 🔐 Method A: Environment Variables (CI/CD)
+
 ```bash
 export DEPLOY_USER_PASSWORD="secure_password"
 export DEPLOY_ROOT_PASSWORD="secure_password"
@@ -278,6 +307,7 @@ export DEPLOY_LUKS_PASSPHRASE="encryption_passphrase"
 ```
 
 ### 🗃️ Method B: Encrypted File (AES-256)
+
 ```bash
 # Create encrypted password file
 ./scripts/utils/passwords.sh create-file passwords.enc mypassphrase user123 root456 luks789
@@ -287,6 +317,7 @@ export DEPLOY_LUKS_PASSPHRASE="encryption_passphrase"
 ```
 
 ### 🎲 Method C: Auto-Generated (Cryptographically Secure)
+
 ```bash
 # Generate secure passwords automatically
 ./scripts/deploy.sh full --password generate
@@ -296,6 +327,7 @@ export DEPLOY_LUKS_PASSPHRASE="encryption_passphrase"
 ```
 
 ### 💬 Method D: Interactive (Traditional)
+
 ```bash
 # Interactive prompts for password entry
 ./scripts/deploy.sh full --password interactive
@@ -310,9 +342,10 @@ export DEPLOY_LUKS_PASSPHRASE="encryption_passphrase"
 For users who want to edit configuration files manually:
 
 ### Create Configuration File (Advanced Users)
+
 ```bash
 # Download template
-curl -O https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/example_deployment_config.yml
+curl -O https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/example_deployment_config.yml
 
 # Customize it
 cp example_deployment_config.yml deployment_config.yml
@@ -320,10 +353,11 @@ nano deployment_config.yml
 ```
 
 ### Run Deployment
+
 ```bash
 # Clone repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Copy and customize configuration
 cp config/deploy.conf my_deploy.conf
@@ -335,18 +369,18 @@ nano my_deploy.conf
 
 ## Method Comparison
 
-| Feature | Zero-Touch | Quick Setup | Advanced | Manual |
-|---------|------------|-------------|-----------|---------|
-| **Questions** | 3 | 5 | 0* | Many |
-| **Time to start** | 30 seconds | 2 minutes | 5 minutes | 30+ minutes |
-| **Auto-detection** | ✅ Everything | ✅ Most | ❌ None | ❌ None |
-| **Config files** | ❌ None | ❌ None | ✅ Manual | ✅ Manual |
-| **Networking** | ✅ Auto | ✅ Auto | ⚠️ Manual | ⚠️ Manual |
-| **Passwords** | ✅ Secure prompts | ✅ Secure prompts | ⚠️ In files | ✅ Prompts |
-| **Customization** | Basic | Medium | Full | Full |
-| **Difficulty** | Beginner | Beginner | Advanced | Expert |
+| Feature            | Zero-Touch        | Quick Setup       | Advanced    | Manual      |
+| ------------------ | ----------------- | ----------------- | ----------- | ----------- |
+| **Questions**      | 3                 | 5                 | 0\*         | Many        |
+| **Time to start**  | 30 seconds        | 2 minutes         | 5 minutes   | 30+ minutes |
+| **Auto-detection** | ✅ Everything     | ✅ Most           | ❌ None     | ❌ None     |
+| **Config files**   | ❌ None           | ❌ None           | ✅ Manual   | ✅ Manual   |
+| **Networking**     | ✅ Auto           | ✅ Auto           | ⚠️ Manual   | ⚠️ Manual   |
+| **Passwords**      | ✅ Secure prompts | ✅ Secure prompts | ⚠️ In files | ✅ Prompts  |
+| **Customization**  | Basic             | Medium            | Full        | Full        |
+| **Difficulty**     | Beginner          | Beginner          | Advanced    | Expert      |
 
-*Advanced method uses pre-made config file
+\*Advanced method uses pre-made config file
 
 **Recommendation**: Use **Zero-Touch** for simplicity, **Quick Setup** for minor customization, **Advanced** for full control.
 
@@ -357,6 +391,7 @@ nano my_deploy.conf
 After installation, you'll have a **complete, secure, modern desktop system**:
 
 ### 🖥️ Desktop Environment
+
 - **Hyprland** - Modern Wayland compositor with tiling
 - **Waybar** - Beautiful status bar with system info
 - **Wofi** - Application launcher
@@ -365,6 +400,7 @@ After installation, you'll have a **complete, secure, modern desktop system**:
 - **SDDM** - Secure display manager
 
 ### 🔒 Security Features
+
 - **UFW Firewall** - Configured and active
 - **fail2ban** - Protects against brute force attacks
 - **Full disk encryption** - LUKS encryption (if enabled)
@@ -373,6 +409,7 @@ After installation, you'll have a **complete, secure, modern desktop system**:
 - **Automatic security updates**
 
 ### 📦 Applications Ready
+
 - **Firefox** - Web browser
 - **Visual Studio Code** - Modern code editor
 - **Discord** - Communication
@@ -381,6 +418,7 @@ After installation, you'll have a **complete, secure, modern desktop system**:
 - **Audio/Video** - PipeWire with Bluetooth support
 
 ### ⚡ Power & Performance
+
 - **TLP** - Laptop power management
 - **Intel GPU optimization** - Hardware acceleration
 - **Thermal management** - Keeps laptop cool
@@ -394,11 +432,13 @@ After installation, you'll have a **complete, secure, modern desktop system**:
 After the automated installation completes:
 
 ### 1. First Boot
+
 - System reboots automatically
 - SDDM login screen appears
 - Login with your username and password
 
 ### 2. Desktop Tour
+
 ```bash
 # Open terminal (Super + Return)
 kitty
@@ -415,6 +455,7 @@ sudo fail2ban-client status
 ```
 
 ### 3. Verify Installation
+
 ```bash
 # Run system health check
 ./tools/system_info.sh
@@ -433,6 +474,7 @@ sudo ./scripts/security/security_audit.sh
 ### Common Issues
 
 **No internet after installation:**
+
 ```bash
 # Check network status
 nmcli device status
@@ -442,12 +484,14 @@ nmcli device wifi connect "SSID" password "password"
 ```
 
 **Hyprland won't start:**
+
 ```bash
 # Check logs
 journalctl -u sddm
 ```
 
 **Performance issues:**
+
 ```bash
 # Check system resources
 htop
@@ -457,6 +501,7 @@ dmesg | grep -i error
 ```
 
 ### Getting Help
+
 - Check logs in `/var/log/`
 - Review configuration in `~/.config/hypr/`
 - Run diagnostic tools in `./tools/`
@@ -482,7 +527,9 @@ tail -f /var/log/deploy.log
 This method provides a balance between automation and control, with minimal manual steps.
 
 ### Phase 1: Manual Base Installation
+
 Follow traditional Arch installation steps for base system only:
+
 1. Boot from ISO and connect to internet
 2. Partition disk manually
 3. Install base system: `pacstrap /mnt base base-devel linux linux-firmware networkmanager sudo git`
@@ -490,9 +537,10 @@ Follow traditional Arch installation steps for base system only:
 5. Install bootloader and reboot
 
 ### Phase 2: Automated Desktop Deployment
+
 ```bash
 # After first boot, download and run automation
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git && cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
 chmod +x scripts/deploy.sh
 
 # Run desktop deployment only
@@ -506,15 +554,17 @@ chmod +x scripts/deploy.sh
 For advanced users who want full control over each step.
 
 ### Prerequisites
+
 - Existing Arch Linux installation with base system
 - User with sudo privileges
 - Internet connectivity
 
 ### Quick Deployment
+
 ```bash
 # Clone repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Install Ansible
 make install
@@ -532,8 +582,9 @@ If you used Method 1 (Fully Automated), your system is already configured and va
 ### ✅ Automated Post-Installation (Method 1)
 
 The automation system automatically handles:
+
 - **System validation** - All components tested
-- **Service verification** - All services enabled and running  
+- **Service verification** - All services enabled and running
 - **Security audit** - Complete security configuration verified
 - **Desktop testing** - Key bindings and applications validated
 - **Maintenance setup** - Update scripts and monitoring configured
@@ -543,15 +594,17 @@ The automation system automatically handles:
 If you used semi-automated or manual installation, run validation:
 
 #### Quick System Status Check
+
 ```bash
 # Run automated validation
 system-status
 
 # Or run comprehensive validation
-./lm_archlinux_desktop/scripts/deployment/auto_post_install.sh
+./lm-archlinux-desktop/scripts/deployment/auto_post_install.sh
 ```
 
 #### Manual Testing
+
 ```bash
 # Reboot to test complete system
 sudo reboot
@@ -574,6 +627,7 @@ echo $XDG_SESSION_TYPE     # Should show "wayland"
 ### Phase 5: Application Testing
 
 #### 5.1 Core Applications
+
 ```bash
 # Test essential applications
 firefox           # Web browser
@@ -583,6 +637,7 @@ kitty             # Terminal
 ```
 
 #### 5.2 Audio System
+
 ```bash
 # Test audio
 pactl info
@@ -591,6 +646,7 @@ speaker-test -c 2 # Audio test
 ```
 
 #### 5.3 AUR Packages
+
 ```bash
 # Check AUR package status
 /home/$USER/.local/bin/aur-backup
@@ -600,6 +656,7 @@ yay -Qm          # List AUR packages
 ### Phase 6: Maintenance Setup
 
 #### 6.1 System Monitoring
+
 ```bash
 # Set up regular maintenance
 make status      # Check system status
@@ -610,6 +667,7 @@ sudo systemctl enable --now systemd-timer
 ```
 
 #### 6.2 Update Procedures
+
 ```bash
 # System updates
 sudo pacman -Syu              # Update official packages
@@ -622,6 +680,7 @@ yay -Sua                      # Update AUR packages
 ### Common Issues
 
 #### Boot Problems
+
 ```bash
 # If system won't boot:
 # 1. Boot from Arch ISO
@@ -637,6 +696,7 @@ bootctl status
 ```
 
 #### Desktop Environment Issues
+
 ```bash
 # If Hyprland won't start:
 systemctl --user status pipewire
@@ -648,6 +708,7 @@ systemctl restart sddm
 ```
 
 #### Network Issues
+
 ```bash
 # Network troubleshooting:
 sudo systemctl restart NetworkManager
@@ -656,6 +717,7 @@ nmcli connection show
 ```
 
 #### Ansible Deployment Issues
+
 ```bash
 # Debug Ansible problems:
 ansible-playbook -vvv [playbook] # Verbose output
@@ -666,6 +728,7 @@ make clean                       # Clean temporary files
 ### Recovery Options
 
 #### System Recovery
+
 ```bash
 # Boot from Arch ISO for system recovery
 # Mount encrypted partitions
@@ -674,6 +737,7 @@ make clean                       # Clean temporary files
 ```
 
 #### Configuration Recovery
+
 ```bash
 # Restore from Git backups
 git checkout HEAD~1 configs/  # Revert to previous config
@@ -683,6 +747,7 @@ make backup                   # Create backup before changes
 ## Advanced Configuration
 
 ### Custom Profiles
+
 ```bash
 # Use different configuration profiles
 # Edit configs/profiles/work/ansible/vars.yml
@@ -690,12 +755,14 @@ make backup                   # Create backup before changes
 ```
 
 ### Additional Security
+
 ```bash
 # Enhanced security options
 ansible-playbook configs/ansible/playbooks/security.yml --extra-vars "enable_strict_hardening=yes"
 ```
 
 ### Performance Tuning
+
 ```bash
 # Laptop-specific optimizations
 # Power management configurations
@@ -705,6 +772,7 @@ ansible-playbook configs/ansible/playbooks/security.yml --extra-vars "enable_str
 ## Maintenance and Updates
 
 ### Regular Maintenance
+
 ```bash
 # Weekly maintenance routine
 make status       # Check system health
@@ -714,6 +782,7 @@ yay -Sua         # Update AUR packages
 ```
 
 ### Security Audits
+
 ```bash
 # Monthly security check
 sudo /usr/local/bin/ufw-status
@@ -723,6 +792,7 @@ sudo /usr/local/bin/permission-audit
 ```
 
 ### Backup Strategy
+
 ```bash
 # Configuration backups
 make backup                    # Local backup

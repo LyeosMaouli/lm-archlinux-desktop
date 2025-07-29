@@ -16,6 +16,7 @@ This project now uses a **direct development approach** that emphasizes simplici
 ### Prerequisites
 
 #### Required Software
+
 - **Arch Linux** (recommended for development)
 - **Git** >= 2.30
 - **Python** >= 3.9
@@ -23,6 +24,7 @@ This project now uses a **direct development approach** that emphasizes simplici
 - **VirtualBox** >= 7.0 (for testing)
 
 #### Optional Tools
+
 - **Visual Studio Code** or your preferred editor
 - **shellcheck** for shell script validation
 - **ansible-lint** for Ansible playbook validation
@@ -31,8 +33,8 @@ This project now uses a **direct development approach** that emphasizes simplici
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # 2. Install system dependencies (Arch Linux)
 sudo pacman -S ansible python python-pip git shellcheck
@@ -69,7 +71,7 @@ ansible-galaxy install -r configs/ansible/requirements.yml
 
 ```bash
 # 1. Start development session
-cd lm_archlinux_desktop
+cd lm-archlinux-desktop
 git status
 git pull origin develop
 
@@ -154,7 +156,7 @@ VirtualBox testing is the **primary and recommended** method for validating chan
 # - Boot from Arch Linux ISO
 
 # 2. Run automated testing
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
+curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
 chmod +x auto_vm_test.sh
 ./auto_vm_test.sh
 
@@ -170,8 +172,8 @@ cat ~/vm_test_report.txt
 # 1. Boot VM from Arch ISO
 # 2. Set up network connectivity
 # 3. Clone repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # 4. Run specific deployment phases
 ./scripts/deploy.sh install --config custom_config.yml
@@ -202,7 +204,7 @@ nano dev_test_config.yml
 ### Key Development Areas
 
 ```
-lm_archlinux_desktop/
+lm-archlinux-desktop/
 ├── configs/ansible/roles/          # Core development area
 │   ├── base_system/                # System configuration
 │   ├── hyprland_desktop/          # Desktop environment
@@ -326,18 +328,21 @@ tail -f /var/log/ansible.log
 ### Common Issues
 
 #### Ansible Collection Issues
+
 ```bash
 # Reinstall collections
 ansible-galaxy collection install --force -r configs/ansible/requirements.yml
 ```
 
 #### Permission Issues
+
 ```bash
 # Fix script permissions
 find scripts/ -name "*.sh" -exec chmod +x {} \;
 ```
 
 #### Network Issues During Testing
+
 ```bash
 # Test network connectivity
 ping -c 3 archlinux.org
@@ -446,13 +451,15 @@ ansible-playbook --skip-tags "facts" local.yml
 ### Tools and Extensions
 
 #### VS Code Extensions (Recommended)
+
 - **Ansible** - Ansible language support
-- **YAML** - YAML language support  
+- **YAML** - YAML language support
 - **ShellCheck** - Shell script validation
 - **Markdown All in One** - Markdown editing
 - **GitLens** - Git integration
 
 #### Command Line Tools
+
 ```bash
 # Install useful development tools
 sudo pacman -S \

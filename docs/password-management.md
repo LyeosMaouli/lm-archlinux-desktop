@@ -17,8 +17,9 @@ PASSWORD_FILE="../passwords.enc"           # Path to encrypted password file
 ```
 
 **Benefits**:
+
 - Single source of truth for all password settings
-- Consistent behavior across USB, local, and CI/CD deployments  
+- Consistent behavior across USB, local, and CI/CD deployments
 - Easy to manage and version control
 - Supports all deployment environments
 
@@ -27,6 +28,7 @@ PASSWORD_FILE="../passwords.enc"           # Path to encrypted password file
 The system supports four password input methods in priority order:
 
 ### 1. Environment Variables (Primary)
+
 **Use Case**: CI/CD pipelines, enterprise automation, container deployments
 
 Set passwords as environment variables before running deployment:
@@ -44,12 +46,14 @@ export DEPLOY_WIFI_PASSWORD="wifi_password"
 ```
 
 **Security Features**:
+
 - Passwords only exist in process environment
 - Automatically cleared after use
 - No disk storage of plain text passwords
 - Process isolation prevents exposure
 
 ### 2. Encrypted Password Files (Secondary)
+
 **Use Case**: Offline deployments, secure password storage, repeatable deployments
 
 Create and use encrypted password files:
@@ -63,12 +67,14 @@ Create and use encrypted password files:
 ```
 
 **Security Features**:
+
 - AES-256 encryption with PBKDF2 key derivation
 - 100,000+ iterations for key strengthening
 - Secure file permissions (600)
 - Base64 encoding for safe storage
 
 ### 3. Auto-Generated Passwords (Tertiary)
+
 **Use Case**: True zero-touch deployments, development environments
 
 Generate cryptographically secure passwords automatically:
@@ -79,12 +85,14 @@ Generate cryptographically secure passwords automatically:
 ```
 
 **Security Features**:
+
 - Cryptographically secure random generation using /dev/urandom
 - Configurable password complexity
 - Multiple secure delivery methods
 - Strength validation and complexity enforcement
 
 ### 4. Interactive Prompts (Fallback)
+
 **Use Case**: Manual deployments, troubleshooting
 
 Traditional secure password prompting:
@@ -97,6 +105,7 @@ Traditional secure password prompting:
 ## 🚀 Quick Start Examples
 
 ### GitHub CI/CD Pipeline
+
 ```yaml
 # GitHub Actions / GitLab CI
 - name: Deploy Arch Linux System
@@ -105,10 +114,11 @@ Traditional secure password prompting:
     DEPLOY_ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
     DEPLOY_LUKS_PASSPHRASE: ${{ secrets.LUKS_PASSPHRASE }}
   run: |
-    curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/deployment/zero_touch_deploy.sh | bash -s -- --password-mode env
+    curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/deployment/zero_touch_deploy.sh | bash -s -- --password-mode env
 ```
 
 ### Secure Offline Deployment
+
 ```bash
 # Create encrypted password file
 ./scripts/utils/passwords.sh create-file \
@@ -124,6 +134,7 @@ Traditional secure password prompting:
 ```
 
 ### Development/Testing Environment
+
 ```bash
 # Auto-generate passwords with file output
 ./zero_touch_deploy.sh \
@@ -135,6 +146,7 @@ Traditional secure password prompting:
 ### Creating Password Files
 
 #### Interactive Creation
+
 ```bash
 # Run password file creator
 ./scripts/utils/passwords.sh create-file
@@ -144,6 +156,7 @@ Traditional secure password prompting:
 ```
 
 #### Command Line Creation
+
 ```bash
 # Non-interactive creation
 ./scripts/utils/passwords.sh create-file \
@@ -155,6 +168,7 @@ Traditional secure password prompting:
 ```
 
 #### Verify Password File
+
 ```bash
 # Verify file integrity and structure
 ./scripts/utils/passwords.sh create-file --verify passwords.enc
@@ -163,6 +177,7 @@ Traditional secure password prompting:
 ### Environment Variable Setup
 
 #### Basic Setup
+
 ```bash
 # Set required passwords
 export DEPLOY_USER_PASSWORD="secure_password"
@@ -174,6 +189,7 @@ export DEPLOY_WIFI_PASSWORD="wifi_password"
 ```
 
 #### Template Generation
+
 ```bash
 # Generate environment template
 ./scripts/utils/passwords.sh template my_env.sh
@@ -189,12 +205,14 @@ source my_env.sh
 ### Auto-Generated Passwords
 
 #### Generation and Display
+
 ```bash
 # Generate passwords and display on screen
 ./scripts/deploy.sh full --password generate
 ```
 
 #### Save Generated Passwords
+
 ```bash
 # Generate and save to various formats
 ./scripts/utils/passwords.sh generate generate file
@@ -202,6 +220,7 @@ source my_env.sh
 ```
 
 #### Password Delivery Methods
+
 ```bash
 # Display as QR code
 ./scripts/utils/passwords.sh display
@@ -230,6 +249,7 @@ source my_env.sh
 ### Delivery Method Configuration
 
 #### Email Delivery Setup
+
 ```bash
 # Configure email delivery
 export DEPLOY_EMAIL_RECIPIENT="user@example.com"
@@ -243,6 +263,7 @@ export DEPLOY_SMTP_PASSWORD="app_password"
 ```
 
 #### QR Code Generation
+
 ```bash
 # Display QR code in terminal
 ./scripts/utils/passwords.sh display
@@ -257,18 +278,21 @@ export DEPLOY_SMTP_PASSWORD="app_password"
 ## 🛡️ Security Best Practices
 
 ### Password Management
+
 1. **Use environment variables for CI/CD** - Most secure for automation
 2. **Use encrypted files for offline deployment** - Secure storage solution
 3. **Auto-generate for development** - Convenient and secure
 4. **Avoid plain text storage** - Never store passwords unencrypted
 
 ### Deployment Security
+
 1. **Verify password strength** - System enforces minimum requirements
 2. **Clear sensitive data** - Automatic cleanup after use
 3. **Use secure channels** - TLS for network communication
 4. **Audit password access** - Log password-related events
 
 ### Storage Security
+
 1. **Encrypted file permissions** - Set to 600 (owner only)
 2. **Secure deletion** - Use shred when available
 3. **Backup encryption** - Always encrypt password backups
@@ -279,6 +303,7 @@ export DEPLOY_SMTP_PASSWORD="app_password"
 ### Core Functions
 
 #### `password_manager.sh`
+
 ```bash
 # Main password collection function
 collect_passwords [mode]
@@ -286,7 +311,7 @@ collect_passwords [mode]
 # Get password by type
 get_password <type>
 
-# Set password by type  
+# Set password by type
 set_password <type> <password>
 
 # Export passwords to environment
@@ -317,6 +342,7 @@ get_password [type]
 ```
 
 #### Legacy Individual Scripts (Deprecated)
+
 ```bash
 # Generate all required passwords
 generate_secure_passwords
@@ -331,6 +357,7 @@ generate_memorable_password <word_count> <add_numbers>
 ### Delivery Functions
 
 #### `qr_delivery.sh`
+
 ```bash
 # Display password QR code
 display_qr_with_instructions
@@ -343,6 +370,7 @@ generate_wifi_qr <ssid> <password> <security>
 ```
 
 #### `email_delivery.sh`
+
 ```bash
 # Send password email
 send_password_email <format> <encrypt>
@@ -352,6 +380,7 @@ configure_email_interactive
 ```
 
 #### `file_delivery.sh`
+
 ```bash
 # Save password file
 save_password_file <output> <format> <encrypt> <compress>
@@ -368,6 +397,7 @@ create_backup_archive <archive_name> <encrypt>
 ### Common Issues
 
 #### Environment Variables Not Found
+
 ```bash
 # Check environment variables
 ./scripts/utils/passwords.sh status
@@ -377,6 +407,7 @@ create_backup_archive <archive_name> <encrypt>
 ```
 
 #### Encrypted File Issues
+
 ```bash
 # Verify file integrity
 ./scripts/utils/passwords.sh create-file --verify passwords.enc
@@ -386,6 +417,7 @@ create_backup_archive <archive_name> <encrypt>
 ```
 
 #### Password Generation Problems
+
 ```bash
 # Test password generation
 ./scripts/utils/passwords.sh generate single 16
@@ -396,12 +428,12 @@ create_backup_archive <archive_name> <encrypt>
 
 ### Error Messages
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| "Password management system not found" | Missing password manager | Check file paths and permissions |
-| "No suitable random source found" | Missing /dev/urandom or OpenSSL | Install OpenSSL or check system |
-| "Failed to decrypt password file" | Wrong passphrase or corrupted file | Verify passphrase and file integrity |
-| "Missing required secrets in CI/CD" | Environment variables not set | Configure secrets in CI/CD system |
+| Error                                  | Cause                              | Solution                             |
+| -------------------------------------- | ---------------------------------- | ------------------------------------ |
+| "Password management system not found" | Missing password manager           | Check file paths and permissions     |
+| "No suitable random source found"      | Missing /dev/urandom or OpenSSL    | Install OpenSSL or check system      |
+| "Failed to decrypt password file"      | Wrong passphrase or corrupted file | Verify passphrase and file integrity |
+| "Missing required secrets in CI/CD"    | Environment variables not set      | Configure secrets in CI/CD system    |
 
 ### Debug Mode
 
@@ -418,9 +450,11 @@ export VERBOSE=true
 ## 🎯 Use Case Examples
 
 ### Scenario 1: Enterprise Deployment
+
 **Requirements**: Automated deployment with corporate security standards
 
 **Solution**: Environment variables with CI/CD integration
+
 ```bash
 # Set in CI/CD secrets
 DEPLOY_USER_PASSWORD: "Corporate#Pass123"
@@ -432,9 +466,11 @@ DEPLOY_LUKS_PASSPHRASE: "Corporate-Disk-Encryption-2024"
 ```
 
 ### Scenario 2: Offline Secure Deployment
+
 **Requirements**: No internet, maximum security
 
 **Solution**: Encrypted password file
+
 ```bash
 # Create offline
 ./scripts/utils/passwords.sh create-file --output secure.enc
@@ -444,9 +480,11 @@ DEPLOY_LUKS_PASSPHRASE: "Corporate-Disk-Encryption-2024"
 ```
 
 ### Scenario 3: Development Environment
+
 **Requirements**: Quick setup, temporary passwords
 
 **Solution**: Auto-generated passwords
+
 ```bash
 # Generate and display
 ./scripts/deploy.sh full --password generate
@@ -456,9 +494,11 @@ DEPLOY_LUKS_PASSPHRASE: "Corporate-Disk-Encryption-2024"
 ```
 
 ### Scenario 4: Remote Team Deployment
+
 **Requirements**: Secure password sharing
 
 **Solution**: Multiple delivery methods
+
 ```bash
 # Generate passwords
 ./scripts/utils/passwords.sh generate generate
@@ -473,6 +513,7 @@ DEPLOY_LUKS_PASSPHRASE: "Corporate-Disk-Encryption-2024"
 ## 🚀 Future Enhancements
 
 ### Planned Features
+
 - **Hardware Security Module (HSM) integration**
 - **OAuth/OIDC provider integration**
 - **Biometric authentication support**
@@ -481,6 +522,7 @@ DEPLOY_LUKS_PASSPHRASE: "Corporate-Disk-Encryption-2024"
 - **Integration with enterprise password managers** (1Password, Bitwarden, etc.)
 
 ### Contributing
+
 To contribute to the password management system:
 
 1. Fork the repository

@@ -81,7 +81,7 @@ vm-test:
 	@echo "Follow the guide: docs/virtualbox-testing-guide.md"
 	@echo ""
 	@echo "Quick test command for VM:"
-	@echo "curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh | bash"
+	@echo "curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh | bash"
 
 # Lint Ansible files and scripts
 lint:

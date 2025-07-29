@@ -17,15 +17,17 @@ This guide shows you how to securely store and use passwords in GitHub for autom
 If you haven't already, get your own copy of the repository:
 
 **Option A: Fork the Repository**
-1. Go to https://github.com/LyeosMaouli/lm_archlinux_desktop
+
+1. Go to https://github.com/LyeosMaouli/lm-archlinux-desktop
 2. Click the "Fork" button in the top right
 3. Choose your account as the destination
 
 **Option B: Clone to Your Own Repository**
+
 ```bash
 # Clone the original repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Create your own repository on GitHub first, then:
 git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
@@ -51,28 +53,33 @@ You'll see a page with tabs: "Secrets" and "Variables". Stay on the **"Secrets"*
 Click **"New repository secret"** for each of these:
 
 **1. DEPLOY_USER_PASSWORD**
+
 - **Name**: `DEPLOY_USER_PASSWORD`
 - **Secret**: Your desired user account password (minimum 8 characters)
 - **Example**: `MySecure#UserPass2024!`
 
 **2. DEPLOY_ROOT_PASSWORD**
-- **Name**: `DEPLOY_ROOT_PASSWORD`  
+
+- **Name**: `DEPLOY_ROOT_PASSWORD`
 - **Secret**: Your desired root/admin password (minimum 8 characters)
 - **Example**: `MySecure#RootPass2024!`
 
 #### Optional Secrets (Enhanced Setup)
 
 **3. DEPLOY_LUKS_PASSPHRASE** (if you want disk encryption)
+
 - **Name**: `DEPLOY_LUKS_PASSPHRASE`
 - **Secret**: Your disk encryption passphrase (minimum 12 characters)
 - **Example**: `My-Very-Secure-Disk-Encryption-Passphrase-2024!`
 
 **4. DEPLOY_WIFI_SSID** (if you need WiFi setup)
+
 - **Name**: `DEPLOY_WIFI_SSID`
 - **Secret**: Your WiFi network name (SSID)
 - **Example**: `MyHomeNetwork_5G`
 
 **5. DEPLOY_WIFI_PASSWORD** (if you need WiFi setup)
+
 - **Name**: `DEPLOY_WIFI_PASSWORD`
 - **Secret**: Your WiFi network password
 - **Example**: `YourWiFiPassword123`
@@ -80,6 +87,7 @@ Click **"New repository secret"** for each of these:
 #### Notification Secrets (Optional)
 
 **6. Email Notifications** (if you want deployment status emails)
+
 - **DEPLOY_EMAIL_RECIPIENT**: `your-email@example.com`
 - **DEPLOY_SMTP_SERVER**: `smtp.gmail.com`
 - **DEPLOY_SMTP_USERNAME**: `your-sender@gmail.com`
@@ -98,7 +106,7 @@ on:
   workflow_dispatch:
     inputs:
       enable_encryption:
-        description: 'Enable disk encryption'
+        description: "Enable disk encryption"
         required: true
         default: true
         type: boolean
@@ -106,22 +114,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Deploy Arch Linux
-      run: |
-        # Download and run deployment script
-        git clone https://github.com/${{ github.repository }}.git && cd $(basename ${{ github.repository }})
-        chmod +x deploy.sh
-        ./deploy.sh --password-mode env
-      env:
-        DEPLOY_USER_PASSWORD: ${{ secrets.DEPLOY_USER_PASSWORD }}
-        DEPLOY_ROOT_PASSWORD: ${{ secrets.DEPLOY_ROOT_PASSWORD }}
-        DEPLOY_LUKS_PASSPHRASE: ${{ secrets.DEPLOY_LUKS_PASSPHRASE }}
-        DEPLOY_WIFI_PASSWORD: ${{ secrets.DEPLOY_WIFI_PASSWORD }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Arch Linux
+        run: |
+          # Download and run deployment script
+          git clone https://github.com/${{ github.repository }}.git && cd $(basename ${{ github.repository }})
+          chmod +x deploy.sh
+          ./deploy.sh --password-mode env
+        env:
+          DEPLOY_USER_PASSWORD: ${{ secrets.DEPLOY_USER_PASSWORD }}
+          DEPLOY_ROOT_PASSWORD: ${{ secrets.DEPLOY_ROOT_PASSWORD }}
+          DEPLOY_LUKS_PASSPHRASE: ${{ secrets.DEPLOY_LUKS_PASSPHRASE }}
+          DEPLOY_WIFI_PASSWORD: ${{ secrets.DEPLOY_WIFI_PASSWORD }}
 ```
 
 ### Step 5: Set Up Email Notifications (Optional)
@@ -129,6 +137,7 @@ jobs:
 If you want to receive deployment notifications via email:
 
 #### Gmail Setup
+
 1. **Enable 2-Factor Authentication** on your Gmail account
 2. **Generate App Password**:
    - Go to Google Account settings
@@ -137,6 +146,7 @@ If you want to receive deployment notifications via email:
    - Use this as `DEPLOY_SMTP_PASSWORD`
 
 #### Add Email Secrets
+
 ```
 DEPLOY_EMAIL_RECIPIENT = your-email@gmail.com
 DEPLOY_SMTP_SERVER = smtp.gmail.com
@@ -159,12 +169,14 @@ The workflow will start and use your stored secrets automatically.
 ### Password Guidelines
 
 **Strong Passwords Should Have**:
+
 - Minimum 8 characters (12+ recommended)
 - Mix of uppercase and lowercase letters
 - Numbers and special characters
 - No dictionary words or personal information
 
 **Good Password Examples**:
+
 ```
 User Password: "MyStr0ng#User2024!"
 Root Password: "Admin$Secure&Pass789"
@@ -172,6 +184,7 @@ LUKS Passphrase: "My-Super-Secure-Disk-Encryption-2024!"
 ```
 
 **Avoid These Passwords**:
+
 ```
 ❌ "password123"
 ❌ "admin"
@@ -182,18 +195,21 @@ LUKS Passphrase: "My-Super-Secure-Disk-Encryption-2024!"
 ### GitHub Secrets Security
 
 ✅ **GitHub Secrets are**:
+
 - Encrypted at rest
 - Never visible in logs
 - Only accessible to authorized workflows
 - Automatically masked in output
 
 ✅ **Best Practices**:
+
 - Use unique passwords for each system
 - Rotate passwords regularly
 - Never hardcode passwords in workflow files
 - Use least privilege access principles
 
 ❌ **Never Do**:
+
 - Commit passwords to repository files
 - Share secrets via insecure channels
 - Use the same password everywhere
@@ -206,7 +222,7 @@ Here's what your secrets should look like in GitHub:
 ```
 Repository Secrets:
 ├── DEPLOY_USER_PASSWORD ********** (masked)
-├── DEPLOY_ROOT_PASSWORD ********** (masked)  
+├── DEPLOY_ROOT_PASSWORD ********** (masked)
 ├── DEPLOY_LUKS_PASSPHRASE **************** (masked)
 ├── DEPLOY_WIFI_PASSWORD ******** (masked)
 ├── DEPLOY_EMAIL_RECIPIENT your-email@gmail.com
@@ -218,23 +234,26 @@ Repository Secrets:
 ## 🚀 Running Your Deployment
 
 ### Method 1: Manual Workflow Run
+
 1. Go to **Actions** tab in your repository
 2. Select **"Deploy Arch Linux"** workflow
 3. Click **"Run workflow"**
 4. Configure options and run
 
 ### Method 2: Automatic Triggers
+
 You can modify the workflow to run automatically:
 
 ```yaml
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+    - cron: "0 2 * * 0" # Weekly on Sunday at 2 AM
 ```
 
 ### Method 3: API Trigger
+
 ```bash
 # Trigger deployment via GitHub API
 curl -X POST \
@@ -247,6 +266,7 @@ curl -X POST \
 ## 🔍 Monitoring and Troubleshooting
 
 ### View Deployment Logs
+
 1. Go to **Actions** tab
 2. Click on a workflow run
 3. Click on the job name
@@ -255,20 +275,24 @@ curl -X POST \
 ### Common Issues
 
 **"Secret not found" errors**:
+
 - Check secret names match exactly (case-sensitive)
 - Ensure secrets are created in repository settings
 - Verify workflow has access to secrets
 
 **"Password too weak" errors**:
+
 - Increase password length (minimum 8 characters)
 - Add more character types (uppercase, numbers, symbols)
 
 **Email delivery fails**:
+
 - Verify SMTP credentials
 - Check if 2-factor authentication is enabled
 - Use app passwords for Gmail
 
 ### Debug Your Setup
+
 Add this step to your workflow for debugging:
 
 ```yaml
@@ -280,7 +304,7 @@ Add this step to your workflow for debugging:
     else
       echo "❌ User password not found"
     fi
-    
+
     if [[ -n "$DEPLOY_ROOT_PASSWORD" ]]; then
       echo "✅ Root password is set (${#DEPLOY_ROOT_PASSWORD} chars)"
     else
@@ -299,7 +323,7 @@ Once configured, your GitHub repository will:
 ✅ **Automatically deploy** Arch Linux systems  
 ✅ **Send notifications** on completion  
 ✅ **Maintain security** with encrypted secrets  
-✅ **Provide audit logs** of all deployments  
+✅ **Provide audit logs** of all deployments
 
 Your passwords are now safely stored in GitHub and ready for automated deployment!
 

@@ -56,10 +56,10 @@ Our **comprehensive VirtualBox-based testing platform** ensures reliable automat
 ## 📁 **Current Repository Structure**
 
 ```
-lm_archlinux_desktop/
+lm-archlinux-desktop/
 ├── 📄 README.md                     # Project overview and documentation
 ├── 📄 CLAUDE.md                     # This file - Claude guidance
-├── 📄 SECURITY.md                   # Security policies and guidelines  
+├── 📄 SECURITY.md                   # Security policies and guidelines
 ├── 📄 LICENSE                       # Project license
 ├── 📄 local.yml                     # Main Ansible playbook (ansible-pull entry point)
 ├── 📄 Makefile                      # Build automation and shortcuts
@@ -222,8 +222,8 @@ lm_archlinux_desktop/
 
 ```bash
 # Clone repository
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 
 # Install dependencies (on Arch Linux)
 sudo pacman -S ansible python python-pip
@@ -259,8 +259,8 @@ ansible-lint configs/ansible/
 ```bash
 # Super simple VirtualBox testing - only 2 file downloads!
 # Boot from Arch Linux ISO, then run:
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
 chmod +x bootstrap.sh
 
 # Edit config if needed, then run:
@@ -297,8 +297,8 @@ chmod +x bootstrap.sh
 
 ```bash
 # Super simple 2-file download approach:
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
-wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
 chmod +x bootstrap.sh
 
 # Edit bootstrap.conf with your preferences, then:
@@ -544,7 +544,7 @@ make test
 - **password-management.md**: Password system documentation
 - **github-password-storage.md**: CI/CD integration guide
 - **target-computer-deployment.md**: Target deployment workflows
-- **project-structure.md**: Complete codebase overview  
+- **project-structure.md**: Complete codebase overview
 - **virtualbox-testing-guide.md**: VM testing environment setup (PRIMARY TESTING)
 - **development-instructions.md**: Development environment setup
 - **direct-development-guide.md**: Direct development workflow
@@ -639,7 +639,8 @@ make test
 This project represents a **streamlined Arch Linux automation solution**, combining direct development practices with comprehensive VirtualBox testing and enterprise-grade security.
 
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.

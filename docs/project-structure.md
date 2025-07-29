@@ -5,6 +5,7 @@
 ## ✨ Project Overview
 
 This project has been **dramatically refactored** for simplicity while maintaining enterprise capabilities:
+
 - **Streamlined Architecture**: Removed 12 deprecated scripts for cleaner codebase
 - **Unified Interface**: Multiple confusing entry points → 1 clear deployment command (`deploy.sh`)
 - **Advanced Hybrid Password Management** with 4 secure methods
@@ -16,7 +17,7 @@ This project has been **dramatically refactored** for simplicity while maintaini
 ## 📁 Complete Directory Structure
 
 ```
-lm_archlinux_desktop/
+lm-archlinux-desktop/
 ├── 📄 README.md                     # Revolutionary project overview
 ├── 📄 LICENSE                       # MIT license
 ├── 📄 .gitignore                    # Version control exclusions
@@ -244,24 +245,28 @@ lm_archlinux_desktop/
 ## 🎯 Key Components Overview
 
 ### 🚀 Revolutionary Deployment System
+
 - **USB Deployment**: Edit config on main PC, deploy with zero typing errors
 - **Zero-Touch Installation**: Answer 3 questions, get complete desktop
 - **Advanced Password Management**: 4 secure methods with encryption
 - **Enterprise CI/CD**: GitHub Actions integration
 
 ### 🛡️ Security Framework
+
 - **Multi-layered Security**: Firewall, fail2ban, audit logging
 - **Password Encryption**: AES-256 with PBKDF2 key derivation
 - **System Hardening**: Kernel parameters, file permissions
 - **Access Control**: SSH hardening, sudo configuration
 
 ### ⚡ Performance & Power Management
+
 - **TLP Integration**: Advanced laptop power management
 - **Intel GPU Optimization**: Hardware-specific tuning
 - **Thermal Management**: Temperature monitoring and control
 - **CPU Scaling**: Performance and efficiency balance
 
 ### 🔧 System Tools & Utilities
+
 - **Hardware Validation**: Compatibility checking and reporting
 - **Backup Management**: Complete system backup with verification
 - **Package Management**: Unified pacman/AUR interface
@@ -270,12 +275,14 @@ lm_archlinux_desktop/
 ## 📚 Documentation Structure
 
 ### Core Documentation
+
 - **installation-guide.md**: Complete deployment methods including USB system
 - **password-management.md**: Advanced password system documentation
 - **github-password-storage.md**: Enterprise CI/CD setup guide
 - **target-computer-deployment.md**: Target deployment workflows
 
 ### Technical Documentation
+
 - **project-structure.md**: Complete codebase overview (this file)
 - **virtualbox-testing-guide.md**: VM testing environment setup
 - **troubleshooting.md**: Common issues and solutions
@@ -283,18 +290,21 @@ lm_archlinux_desktop/
 ## 🔄 Workflow Integration
 
 ### Development Workflow
+
 1. **Development**: Edit code, test in VM
 2. **Validation**: Run testing scripts
 3. **Documentation**: Update relevant guides
 4. **Integration**: CI/CD pipeline validation
 
 ### Deployment Workflow
+
 1. **Preparation**: Choose deployment method (USB/Direct/CI-CD)
 2. **Configuration**: Set up passwords using preferred method
 3. **Deployment**: Execute deployment scripts
 4. **Validation**: Run post-installation tests
 
 ### Maintenance Workflow
+
 1. **Monitoring**: Regular system health checks
 2. **Updates**: Automated system and package updates
 3. **Backup**: Regular configuration and data backups
@@ -303,15 +313,17 @@ lm_archlinux_desktop/
 ## 🚀 Getting Started
 
 ### Quick Start Options
+
 1. **USB Deployment** (Recommended): Download `usb-deployment/` folder
 2. **Direct Installation**: Use `scripts/deploy.sh full`
 3. **Enterprise Setup**: Configure GitHub Secrets workflow
 4. **Traditional**: Clone repository and use Makefile
 
 ### Development Setup
+
 ```bash
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 make dev-setup  # Install development tools
 make test      # Run validation tests
 ```

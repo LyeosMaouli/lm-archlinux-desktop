@@ -392,7 +392,7 @@ FILES INCLUDED:
 - profiles/: Configuration profiles
 
 For more information, visit:
-https://github.com/LyeosMaouli/lm_archlinux_desktop
+https://github.com/LyeosMaouli/lm-archlinux-desktop
 
 Generated: $(date)
 EOF

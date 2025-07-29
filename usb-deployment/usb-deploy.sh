@@ -19,7 +19,7 @@ set -euo pipefail
 
 # Your GitHub repository details (required)
 GITHUB_USERNAME="LyeosMaouli"
-GITHUB_REPO="lm_archlinux_desktop"
+GITHUB_REPO="lm-archlinux-desktop"
 GITHUB_BRANCH="main"
 
 # No USB-specific password configuration needed - deploy.sh auto-detects .enc files
@@ -210,7 +210,7 @@ download_deployment_script() {
         # Copy the entire project structure to ensure all dependencies are available
         if [[ -d "$temp_repo_dir/scripts" ]]; then
             # Create project directory structure
-            local project_dir="$USB_DIR/lm_archlinux_desktop"
+            local project_dir="$USB_DIR/lm-archlinux-desktop"
             mkdir -p "$project_dir"
             
             # Copy essential directories
@@ -344,7 +344,7 @@ run_deployment() {
     fi
     
     # Change to project directory
-    local project_dir="$USB_DIR/lm_archlinux_desktop"
+    local project_dir="$USB_DIR/lm-archlinux-desktop"
     cd "$project_dir"
     
     # Run deployment - deploy.sh will auto-detect .enc files and configure itself
@@ -390,7 +390,7 @@ Password Handling:
 - All handled transparently by deploy.sh
 
 For more information, visit:
-https://github.com/LyeosMaouli/lm_archlinux_desktop
+https://github.com/LyeosMaouli/lm-archlinux-desktop
 
 EOF
 }
