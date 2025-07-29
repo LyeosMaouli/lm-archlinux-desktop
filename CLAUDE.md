@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🚀 **NEXT-GENERATION ARCH LINUX AUTOMATION SYSTEM**
+## 🚀 **SIMPLIFIED ARCH LINUX AUTOMATION SYSTEM**
 
-This is a **next-generation, enterprise-grade Arch Linux desktop automation system** built with modern DevOps practices, featuring **container-based development environments**, **performance optimizations**, **structured logging**, and **comprehensive monitoring**. The system transforms minimal Arch installations into fully-configured Hyprland desktop environments with **advanced deployment automation**, **comprehensive security hardening**, and **flexible configuration management**.
+This is a **streamlined, enterprise-grade Arch Linux desktop automation system** built with modern DevOps practices, featuring **direct development workflows**, **VirtualBox-based testing**, **performance optimizations**, **structured logging**, and **comprehensive monitoring**. The system transforms minimal Arch installations into fully-configured Hyprland desktop environments with **advanced deployment automation**, **comprehensive security hardening**, and **flexible configuration management**.
 
 ### 🎯 **Core Mission**
 
@@ -22,46 +22,15 @@ Transform a minimal Arch Linux installation into a fully-configured, secure Hypr
 - **Performance Optimizations**: Parallel processing and intelligent caching for 3x faster deployments
 - **Structured Logging**: JSON-based logging with correlation IDs and deployment tracking
 
-#### 🐳 **Container Development Environment** _(NEXT-GENERATION)_
+#### 🧪 **VirtualBox Testing Environment** _(PRIMARY TESTING METHOD)_
 
-Our **enterprise-grade container-based development platform** revolutionizes the development experience:
+Our **comprehensive VirtualBox-based testing platform** ensures reliable automation:
 
-- **🎯 DevContainers Integration**: Full VSCode Dev Containers support with:
-  - Automated environment setup and configuration
-  - Pre-installed development toolchain (Ansible, Python, testing frameworks)
-  - Integrated debugging and IntelliSense support
-  - One-click development environment activation
-
-- **🚀 Multi-Service Docker Compose Stack**:
-  - **Development Container** (`dev`): Complete Arch Linux environment with all tools
-  - **Documentation Server** (`docs`): Live documentation at http://localhost:8000 with MkDocs
-  - **Testing Environment** (`test`): Isolated testing with read-only source mounts
-  - **Redis Cache** (`redis`): High-performance caching and task queue system
-  - **PostgreSQL Database** (`postgres`): Optional database for development data storage
-
-- **🧪 Advanced Testing Infrastructure**:
-  - Isolated container-based testing environments
-  - Read-only source mounts prevent test contamination
-  - Comprehensive validation with molecule, pytest, and custom test suites
-  - Automated CI/CD testing workflows
-
-- **🔧 Comprehensive Development Toolchain**:
-  - Pre-commit hooks for automated code quality enforcement
-  - Integrated linting (ansible-lint, shellcheck, yamllint, black, flake8)
-  - Security scanning with bandit and safety
-  - Modern CLI tools (bat, exa, fd, ripgrep, fzf)
-
-- **📚 Interactive Documentation System**:
-  - Live documentation server with auto-reload capabilities
-  - MkDocs integration with Material theme
-  - Real-time documentation updates during development
-  - Interactive API documentation generation
-
-- **📊 Performance Monitoring & Analytics**:
-  - Built-in deployment performance tracking and optimization
-  - Resource usage monitoring and optimization suggestions
-  - Deployment analytics with correlation tracking
-  - Performance benchmarking and regression detection
+- **🎯 Automated VM Testing**: Complete automation from ISO to desktop with `auto_vm_test.sh`
+- **🚀 Full System Validation**: End-to-end testing in isolated VM environment
+- **🔧 VM Optimizations**: Guest additions, performance tuning, and VM-specific configurations
+- **📊 Comprehensive Reporting**: Detailed test reports and validation results
+- **🛡️ Safe Testing**: Isolated environment prevents host system contamination
 
 #### 🔒 **Security-First Architecture**
 
@@ -90,22 +59,13 @@ Our **enterprise-grade container-based development platform** revolutionizes the
 lm_archlinux_desktop/
 ├── 📄 README.md                     # Project overview and documentation
 ├── 📄 CLAUDE.md                     # This file - Claude guidance
-├── 📄 SECURITY.md                   # Security policies and guidelines
+├── 📄 SECURITY.md                   # Security policies and guidelines  
 ├── 📄 LICENSE                       # Project license
 ├── 📄 local.yml                     # Main Ansible playbook (ansible-pull entry point)
 ├── 📄 Makefile                      # Build automation and shortcuts
 ├── 📄 deployment_config.yml         # Main deployment configuration template
 ├── 📄 example_deployment_config.yml # Example configuration file
 ├── 📄 requirements.txt              # Python/Ansible dependencies
-├── 📄 docker-compose.yml            # 🆕 Development services configuration
-├── 📄 Dockerfile.dev                # 🆕 Development environment image
-│
-├── 📂 .devcontainer/                # 🆕 VSCode DevContainers configuration
-│   ├── 📄 devcontainer.json         # Container configuration and extensions
-│   ├── 📄 Dockerfile                # Development environment setup
-│   └── 📂 scripts/                  # Container lifecycle scripts
-│       ├── 📄 post-create.sh        # Post-creation setup
-│       └── 📄 post-start.sh         # Post-start configuration
 │
 ├── 📂 config/                       # 🔧 Configuration Files
 │   ├── 📄 deploy.conf               # Default deployment configuration
@@ -132,15 +92,6 @@ lm_archlinux_desktop/
 │       ├── 📂 personal/            # Personal system profile
 │       └── 📂 development/         # Development environment profile
 │
-├── 📂 dev/                          # 🆕 Development Environment
-│   ├── 📄 README.md                # Development documentation and workflows
-│   ├── 📂 scripts/                 # Development helper scripts
-│   │   ├── 📄 setup-dev.sh         # Development environment setup
-│   │   ├── 📄 run-tests.sh         # Test runner with coverage
-│   │   └── 📄 quality-check.sh     # Code quality and linting
-│   └── 📂 database/                # Database initialization scripts
-│       └── 📂 init/                # PostgreSQL init scripts for development
-│
 ├── 📂 docs/                         # 📚 Comprehensive Documentation
 │   ├── 📄 README.md                # Documentation index
 │   ├── 📄 installation-guide.md    # Complete installation methods
@@ -148,12 +99,13 @@ lm_archlinux_desktop/
 │   ├── 📄 github-password-storage.md # GitHub Secrets integration
 │   ├── 📄 target-computer-deployment.md # Target deployment workflow
 │   ├── 📄 project-structure.md     # Complete project overview
-│   ├── 📄 virtualbox-testing-guide.md # VM testing environment
+│   ├── 📄 virtualbox-testing-guide.md # VM testing environment (PRIMARY)
 │   ├── 📄 development-instructions.md # Development setup guide
-│   ├── 📂 fixes/                   # 🆕 Issue tracking and resolution
+│   ├── 📄 direct-development-guide.md # Direct development workflow
+│   ├── 📂 fixes/                   # Issue tracking and resolution
 │   │   ├── 📄 fix-plan.md          # Systematic fix planning
 │   │   └── 📄 identified-issues.md # Known issues and solutions
-│   └── 📂 improvements/            # 🆕 Enhancement documentation
+│   └── 📂 improvements/            # Enhancement documentation
 │       ├── 📄 improvement-plan.md  # Strategic improvement roadmap
 │       └── 📄 enhancement-opportunities.md # Enhancement opportunities analysis
 │
@@ -174,9 +126,9 @@ lm_archlinux_desktop/
 │   │   ├── 📄 fail2ban_setup.sh    # Intrusion prevention system
 │   │   ├── 📄 system_hardening.sh  # Comprehensive security hardening
 │   │   └── 📄 security_audit.sh    # Security audit and validation
-│   ├── 📂 testing/                 # Testing & validation
+│   ├── 📂 testing/                 # Testing & validation (PRIMARY)
 │   │   ├── 📄 test_installation.sh # Installation validation
-│   │   └── 📄 auto_vm_test.sh      # Automated VM testing
+│   │   └── 📄 auto_vm_test.sh      # Automated VM testing (MAIN TEST METHOD)
 │   ├── 📂 maintenance/             # System maintenance
 │   │   └── 📄 health_check.sh      # System health monitoring
 │   ├── 📂 utilities/               # System utilities
@@ -186,7 +138,7 @@ lm_archlinux_desktop/
 │   │   ├── 📄 network_auto_setup.sh # Network auto-configuration
 │   │   └── 📄 usb_preparation.sh    # USB deployment preparation
 │   └── 📂 utils/                   # Core utilities
-│       ├── 📄 deployment_monitor.sh # 🆕 Deployment performance monitoring
+│       ├── 📄 deployment_monitor.sh # Deployment performance monitoring
 │       ├── 📄 hardware.sh          # Hardware detection utilities
 │       ├── 📄 network.sh           # Network utilities
 │       ├── 📄 passwords.sh         # Password management utilities
@@ -259,56 +211,85 @@ lm_archlinux_desktop/
 ### Essential Applications
 
 - **AUR Packages**: `visual-studio-code-bin`, `discord`, `zoom`, `hyprpaper`
-- **Development**: Git, Python, Node.js, Docker support
+- **Development**: Git, Python, Node.js development tools
 - **Security**: UFW, fail2ban, audit tools
 
 ## 🛠️ **Development Workflows**
 
-### 🐳 **Container-Based Development** _(NEXT-GENERATION & RECOMMENDED)_
+### 📋 **Direct Development** _(SIMPLIFIED & RECOMMENDED)_
 
-#### 1. VSCode DevContainers (PREFERRED FOR DEVELOPMENT)
+#### 1. Local Development Setup
 
 ```bash
-# 1. Install VSCode and Dev Containers extension
-# 2. Clone repository and open in VSCode
+# Clone repository
 git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-code lm_archlinux_desktop
+cd lm_archlinux_desktop
 
-# 3. Reopen in Container (Ctrl+Shift+P -> "Dev Containers: Reopen in Container")
-# 4. Everything is automatically set up with all development tools!
+# Install dependencies (on Arch Linux)
+sudo pacman -S ansible python python-pip
+pip install -r requirements.txt
 
-# Inside container - enhanced development commands:
-dev-deploy --dry-run full    # Test deployment with performance monitoring
-dev-test                     # Run comprehensive test suite with coverage
-dev-lint                     # Code quality checks with auto-fix
-dev-info                     # Show development environment information
-dev-docs-build              # Build interactive documentation
-dev-monitor                  # Monitor deployment performance and analytics
+# Install Ansible collections
+ansible-galaxy install -r configs/ansible/requirements.yml
+
+# Start development
+./scripts/deploy.sh --help
 ```
 
-#### 2. Docker Compose Development Stack
+#### 2. Development Commands
 
 ```bash
-# Start complete development environment
-docker compose up -d dev docs redis
+# Test deployment configuration
+./scripts/deploy.sh full --dry-run
 
-# Access development container
-docker compose exec dev bash
+# Validate Ansible configurations
+ansible-lint configs/ansible/
 
-# Run isolated tests in separate container
-docker compose --profile testing up test
-docker compose exec test ./scripts/testing/test_installation.sh
+# Run deployment on target system
+./scripts/deploy.sh full --password generate --hostname myarch
 
-# Documentation server with live reload (http://localhost:8000)
-docker compose up docs
+# Test installation validation
+./scripts/testing/test_installation.sh
+```
 
-# Database development (optional)
-docker compose --profile database up postgres
+### 🧪 **VirtualBox Testing** _(PRIMARY TESTING METHOD)_
+
+#### 1. Automated VM Testing (Recommended)
+
+```bash
+# Quick automated testing in VirtualBox VM
+# Boot from Arch Linux ISO, then run:
+curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
+chmod +x auto_vm_test.sh
+./auto_vm_test.sh
+
+# Script handles everything automatically:
+# - Network setup and validation
+# - Disk partitioning and encryption
+# - Base system installation with systemd-boot
+# - Desktop environment deployment
+# - Security hardening and validation
+# - Comprehensive test report generation
+```
+
+#### 2. Manual VM Testing
+
+```bash
+# For detailed testing control, follow the complete guide:
+# See docs/virtualbox-testing-guide.md
+
+# Create VirtualBox VM with:
+# - 8GB RAM, 60GB disk
+# - EFI enabled
+# - NAT network
+# - Boot from Arch ISO
+
+# Then run automated testing or manual deployment
 ```
 
 ### Primary Deployment Methods
 
-#### 3. Unified Deploy Script (PRODUCTION DEPLOYMENT)
+#### 1. Unified Deploy Script (PRODUCTION DEPLOYMENT)
 
 ```bash
 # Complete automated deployment
@@ -378,11 +359,11 @@ mount /dev/sdX1 /mnt/usb && cd /mnt/usb
 ### Testing and Validation
 
 ```bash
-# Run comprehensive validation
-./scripts/testing/test_installation.sh
-
-# VirtualBox automated testing
+# Run comprehensive VirtualBox testing (RECOMMENDED)
 ./scripts/testing/auto_vm_test.sh
+
+# Run installation validation
+./scripts/testing/test_installation.sh
 
 # System health monitoring
 ./scripts/maintenance/health_check.sh
@@ -438,16 +419,14 @@ make test
 
 ## 🔄 **Development Guidelines**
 
-### 🐳 **Container-First Development Standards**
+### 📋 **Direct Development Standards**
 
-- **DevContainers Priority**: Use VSCode DevContainers as the primary development method
-- **Docker Compose Integration**: Leverage multi-service development stack for comprehensive testing
-- **Isolated Testing**: Use container-based testing environments for safe validation
+- **Host-Based Development**: Use your local system with required tools installed
+- **VirtualBox Testing**: Use VirtualBox as the primary testing environment
+- **Branch Strategy**: Separate `develop` and `testing` branches for different workflows
 - **Performance Monitoring**: Monitor and optimize deployment performance with built-in analytics
-- **Structured Logging**: Use JSON-based logging with correlation IDs for all development activities
-- **Code Quality Automation**: Leverage pre-commit hooks, automated testing, and integrated linting
-- **Interactive Documentation**: Maintain live, interactive documentation with auto-reload capabilities
-- **Container Security**: Follow container security best practices in development environments
+- **Structured Logging**: Use JSON-based logging with correlation IDs for all activities
+- **Code Quality**: Leverage ansible-lint, shellcheck, and validation scripts
 
 ### Code Quality Standards
 
@@ -457,10 +436,8 @@ make test
 - **Variable Parameterization**: All templates parameterized via variables
 - **Meaningful Tags**: Include tags for selective execution
 - **Directory Structure**: Follow established patterns when adding components
-- **Testing Required**: Test all changes with provided validation scripts
+- **Testing Required**: Test all changes with VirtualBox VM testing
 - **Performance Testing**: Benchmark and optimize deployment performance
-- **Container Testing**: Test in isolated container environments before VM testing
-- **Development Environment Consistency**: Use DevContainers or Docker Compose for all development work
 
 ### Security Requirements
 
@@ -468,7 +445,6 @@ make test
 - **Secure Defaults**: All configurations use security-first approach
 - **File Permissions**: Proper permissions on all created files
 - **Audit Trail**: Log all security-relevant operations
-- **Container Security**: Follow container security best practices in development
 
 ## 🎯 **Interactive Features**
 
@@ -551,9 +527,10 @@ make test
 - **password-management.md**: Password system documentation
 - **github-password-storage.md**: CI/CD integration guide
 - **target-computer-deployment.md**: Target deployment workflows
-- **project-structure.md**: Complete codebase overview
-- **virtualbox-testing-guide.md**: VM testing environment setup
+- **project-structure.md**: Complete codebase overview  
+- **virtualbox-testing-guide.md**: VM testing environment setup (PRIMARY TESTING)
 - **development-instructions.md**: Development environment setup
+- **direct-development-guide.md**: Direct development workflow
 
 ### Key Dependencies and Requirements
 
@@ -564,11 +541,11 @@ make test
 
 ### Documentation Requirements
 
-- **Keep Updated**: Always reflect current project capabilities, especially container development features
+- **Keep Updated**: Always reflect current project capabilities
 - **Security Focus**: Emphasize security features and best practices
-- **Clear Examples**: Provide working examples for all features, including container workflows  
-- **Container Documentation**: Document all Docker Compose services and DevContainer configurations
-- **Troubleshooting**: Include common issues and solutions, especially container-related problems
+- **Clear Examples**: Provide working examples for all features
+- **VirtualBox Testing**: Document all VM testing procedures and configurations
+- **Troubleshooting**: Include common issues and solutions
 
 ## ⚡ **Performance & Power Management**
 
@@ -590,14 +567,14 @@ make test
 
 ### Support Resources
 
-- **VirtualBox Testing**: Complete VM testing framework
+- **VirtualBox Testing**: Complete VM testing framework with `auto_vm_test.sh`
 - **Log Analysis**: Automated log analysis and error extraction
 - **Hardware Validation**: Comprehensive compatibility checking
 - **Documentation**: Complete troubleshooting guides
 
 ## 🎯 **Current Project Status**
 
-### Implementation Status: **NEXT-GENERATION READY**
+### Implementation Status: **SIMPLIFIED & STREAMLINED**
 
 - ✅ **Core Infrastructure**: Ansible-based automation framework complete
 - ✅ **Deployment System**: Unified CLI with multiple deployment modes
@@ -606,13 +583,10 @@ make test
 - ✅ **Profile Management**: Work, personal, and development configurations
 - ✅ **Power Management**: Laptop optimization with TLP integration
 - ✅ **Documentation**: Complete guides and examples
-- ✅ **Testing Framework**: VM testing and validation system
-- 🆕 **Container Development**: Full DevContainers and Docker Compose support
-- 🆕 **Performance Optimizations**: Parallel processing and intelligent caching
-- 🆕 **Structured Logging**: JSON-based logging with correlation tracking
-- 🆕 **Development Tools**: Pre-commit hooks, automated testing, code quality tools
-- 🆕 **Documentation Server**: Live documentation with interactive features
-- 🆕 **Monitoring & Analytics**: Deployment performance tracking and optimization
+- ✅ **VirtualBox Testing**: Comprehensive automated VM testing framework
+- ✅ **Performance Optimizations**: Parallel processing and intelligent caching
+- ✅ **Structured Logging**: JSON-based logging with correlation tracking
+- ✅ **Direct Development**: Simplified development without container complexity
 
 ### Architecture Highlights
 
@@ -621,12 +595,34 @@ make test
 - **Configuration**: `deployment_config.yml` - Main configuration template
 - **Role-Based**: Modular Ansible roles for each system component
 - **Template-Driven**: Jinja2 templates for dynamic configuration generation
+- **VM Testing**: `scripts/testing/auto_vm_test.sh` - Comprehensive automated testing
 
 ### Ready For
 
 - ✅ **Production Deployment**: Stable, tested automation system
-- ✅ **Development**: Modular architecture for easy extension
+- ✅ **Development**: Simplified direct development workflow
 - ✅ **Educational Use**: Well-documented learning resource
 - ✅ **Enterprise Use**: Security-hardened business environment deployment
 
-This project represents a **comprehensive Arch Linux automation solution**, combining modern DevOps practices with enterprise-grade security and desktop environment automation.
+## 🎯 **Branch Strategy**
+
+### Repository Branches
+
+- **`main`**: Stable, production-ready code
+- **`develop`**: Active development branch with direct development workflow
+- **`testing`**: Testing branch with VirtualBox configurations and testing scripts
+
+### Development Workflow
+
+1. **Development**: Work on `develop` branch with direct development tools
+2. **Testing**: Use VirtualBox testing to validate changes
+3. **Integration**: Merge tested changes to `main` branch
+4. **Release**: Tag stable releases for production deployment
+
+This project represents a **streamlined Arch Linux automation solution**, combining direct development practices with comprehensive VirtualBox testing and enterprise-grade security.
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
