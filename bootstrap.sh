@@ -87,7 +87,7 @@ Usage: $0 [DEPLOYMENT_TYPE] [OPTIONS]
 
 DEPLOYMENT TYPES:
   full        Complete system deployment (default)
-  testing     VirtualBox testing deployment
+  testing     VirtualBox testing deployment (uses 'full' command)
   install     Base system installation only
   desktop     Desktop environment only
   security    Security hardening only
@@ -245,16 +245,31 @@ verify_prerequisites() {
         error "Root privileges required for system installation. Run with sudo or as root."
     fi
     
-    # Check network connectivity
-    if ! ping -c 1 -W 5 8.8.8.8 >/dev/null 2>&1; then
-        error "No network connectivity. Please check your internet connection."
+    # Check network connectivity (try curl first, then ping as fallback)
+    if command -v curl >/dev/null 2>&1; then
+        if ! curl -s --connect-timeout 5 --max-time 10 https://www.google.com >/dev/null 2>&1; then
+            error "No network connectivity. Please check your internet connection."
+        fi
+    elif command -v ping >/dev/null 2>&1; then
+        if ! ping -c 1 -W 5 8.8.8.8 >/dev/null 2>&1; then
+            error "No network connectivity. Please check your internet connection."
+        fi
+    else
+        warn "Cannot verify network connectivity - no curl or ping available"
     fi
     
     # Check available disk space (at least 2GB for downloads)
     local available_space
     available_space=$(df /tmp --output=avail | tail -1)
-    if [[ "$available_space" -lt 2097152 ]]; then  # 2GB in KB
-        error "Insufficient disk space. At least 2GB required in /tmp"
+    local required_space=2097152  # 2GB in KB
+    
+    if [[ "$VERBOSE" == true ]]; then
+        info "Disk space check: Available: ${available_space}KB, Required: ${required_space}KB"
+    fi
+    
+    if [[ "$available_space" -lt "$required_space" ]]; then
+        local available_gb=$((available_space / 1048576))
+        error "Insufficient disk space. At least 2GB required in /tmp (currently ${available_gb}GB available)"
     fi
     
     # Check if git is available or can be installed
@@ -353,8 +368,33 @@ verify_repository() {
 run_deployment() {
     info "Starting $DEPLOYMENT_TYPE deployment..."
     
+    # Map deployment types to deploy.sh commands
+    local deploy_command=""
+    case "$DEPLOYMENT_TYPE" in
+        full)
+            deploy_command="full"
+            ;;
+        testing)
+            # For testing, use full deployment with dry-run if not already set
+            deploy_command="full"
+            info "Testing deployment will use 'full' command"
+            ;;
+        install)
+            deploy_command="install"
+            ;;
+        desktop)
+            deploy_command="desktop"
+            ;;
+        security)
+            deploy_command="security"
+            ;;
+        *)
+            error "Unknown deployment type: $DEPLOYMENT_TYPE"
+            ;;
+    esac
+    
     # Prepare deployment command
-    local deploy_cmd="./scripts/deploy.sh $DEPLOYMENT_TYPE"
+    local deploy_cmd="./scripts/deploy.sh $deploy_command"
     
     # Add common options
     if [[ "$DRY_RUN" == true ]]; then
