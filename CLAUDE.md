@@ -254,16 +254,20 @@ ansible-lint configs/ansible/
 
 ### 🧪 **VirtualBox Testing** _(PRIMARY TESTING METHOD)_
 
-#### 1. Automated VM Testing (Recommended)
+#### 1. Bootstrap Testing (Recommended)
 
 ```bash
-# Quick automated testing in VirtualBox VM
+# Super simple VirtualBox testing - only 2 file downloads!
 # Boot from Arch Linux ISO, then run:
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
-chmod +x auto_vm_test.sh
-./auto_vm_test.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+chmod +x bootstrap.sh
 
-# Script handles everything automatically:
+# Edit config if needed, then run:
+./bootstrap.sh testing --verbose
+
+# Bootstrap script handles everything automatically:
+# - Repository download and verification
 # - Network setup and validation
 # - Disk partitioning and encryption
 # - Base system installation with systemd-boot
@@ -289,13 +293,26 @@ chmod +x auto_vm_test.sh
 
 ### Primary Deployment Methods
 
-#### 1. Unified Deploy Script (PRODUCTION DEPLOYMENT)
+#### 1. Bootstrap Deployment (PRODUCTION DEPLOYMENT - RECOMMENDED)
 
 ```bash
-# Complete automated deployment
-./scripts/deploy.sh full
+# Super simple 2-file download approach:
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+chmod +x bootstrap.sh
 
-# Custom deployment with options
+# Edit bootstrap.conf with your preferences, then:
+./bootstrap.sh full                    # Complete deployment
+./bootstrap.sh desktop                 # Desktop environment only
+./bootstrap.sh security                # Security hardening only
+./bootstrap.sh full --verbose          # With verbose output
+./bootstrap.sh full --dry-run          # Preview actions
+```
+
+#### 2. Direct Deploy Script (ADVANCED USERS)
+
+```bash
+# After cloning repository manually:
 ./scripts/deploy.sh full --profile personal --password generate --hostname myarch
 
 # Step-by-step deployment

@@ -5,7 +5,7 @@
 ![Ansible](https://img.shields.io/badge/Ansible-EE0000?logo=ansible&logoColor=fff&style=flat)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-**🚀 STREAMLINED ARCH LINUX AUTOMATION** - Transform a minimal Arch Linux installation into a fully-configured Hyprland desktop environment with **enterprise-grade security**, **advanced password management**, **VirtualBox testing**, and **zero-touch deployment**. Now with **simplified development workflow** and **comprehensive VirtualBox testing**!
+**🚀 STREAMLINED ARCH LINUX AUTOMATION** - Transform a minimal Arch Linux installation into a fully-configured Hyprland desktop environment with **enterprise-grade security**, **advanced password management**, **super-simple bootstrap process**, and **zero-touch deployment**. Now with **2-file download setup** and **comprehensive VirtualBox testing**!
 
 ## 🎯 Simplified Deployment Interface
 
@@ -26,16 +26,16 @@
 
 ### Key Improvements
 
-- ✅ **Auto-Dependency Installation**: Missing packages (ansible, cryptsetup) installed automatically
-- ✅ **Centralized Configuration**: Single `config/deploy.conf` for all settings
-- ✅ **Intelligent Path Resolution**: Works from USB, local, CI/CD environments
-- ✅ **Enhanced Logging**: Standardized logging across all 20+ scripts
-- ✅ **Unified Interface**: Single `deploy.sh` command replaces 5 different entry points
-- ✅ **Robust Error Handling**: Automatic recovery from common deployment issues
-- 🆕 **VirtualBox Testing**: Comprehensive automated VM testing with `auto_vm_test.sh`
+- ✅ **2-File Bootstrap**: Download only `bootstrap.sh` + `bootstrap.conf` - that's it!
+- ✅ **Zero Typing Errors**: No more long curl commands or complex URLs
+- ✅ **Auto-Everything**: Automatic dependency installation, repo download, and verification
+- ✅ **Edit & Run**: Simple config file editing + single command deployment
+- ✅ **Repository Verification**: Automatic integrity checking and security validation
+- ✅ **Intelligent Error Handling**: Comprehensive error detection and recovery
+- 🆕 **Super Simple Process**: 3 steps total - download, edit, run
+- 🆕 **VirtualBox Testing**: Safe VM testing before production deployment
 - 🆕 **Direct Development**: Simplified development workflow without container complexity
 - 🆕 **Performance Optimizations**: Parallel processing and intelligent caching
-- 🆕 **Structured Logging**: JSON-based logging with correlation IDs for monitoring
 
 ## ✨ Key Features
 
@@ -159,60 +159,97 @@ Simplified development approach for maximum productivity:
 
 ## 🚀 Quick Start
 
-### 1. VirtualBox Testing (Recommended)
+### 🎯 **Super Simple 3-Step Process**
 
-Test the automation safely in a VM before deploying to your main system:
+#### Step 1: Download Bootstrap Files
+```bash
+# Download the bootstrap script and configuration
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+chmod +x bootstrap.sh
+```
+
+#### Step 2: Edit Configuration
+```bash
+# Edit the configuration file with your preferences
+nano bootstrap.conf
+
+# Key settings to customize:
+# - HOSTNAME=phoenix          # Your computer name
+# - USERNAME=lyeosmaouli      # Your username  
+# - PROFILE=work              # work/personal/development
+# - TIMEZONE=Europe/Paris     # Your timezone
+# - KEYMAP=fr                # Your keyboard layout
+```
+
+#### Step 3: Run Deployment
+```bash
+# For VirtualBox testing (recommended first):
+./bootstrap.sh testing
+
+# For full production deployment:
+./bootstrap.sh full
+
+# For specific components only:
+./bootstrap.sh desktop    # Desktop environment only
+./bootstrap.sh security   # Security hardening only
+```
+
+**That's it!** The bootstrap script handles everything:
+- ✅ Downloads and verifies the complete repository
+- ✅ Validates system requirements and network connectivity
+- ✅ Installs dependencies automatically
+- ✅ Runs the deployment with your configuration
+- ✅ Provides comprehensive logging and error handling
+
+### 🧪 **VirtualBox Testing (Highly Recommended)**
+
+Test safely in a VM before deploying to your main system:
 
 ```bash
-# 1. Create VirtualBox VM (8GB RAM, 60GB disk, EFI enabled)
-# 2. Boot from Arch Linux ISO
-# 3. Run automated testing:
+# 1. Create VirtualBox VM:
+#    - 8GB RAM, 60GB disk
+#    - EFI enabled, NAT network
+#    - Boot from Arch Linux ISO
 
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/testing/auto_vm_test.sh -o auto_vm_test.sh
-chmod +x auto_vm_test.sh
-./auto_vm_test.sh
+# 2. Download and run bootstrap:
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/bootstrap.conf
+chmod +x bootstrap.sh
 
-# Script handles everything automatically:
+# 3. Edit configuration for testing:
+nano bootstrap.conf  # Set VM_MEMORY=8192, VM_OPTIMIZATION=true
+
+# 4. Run testing deployment:
+./bootstrap.sh testing --verbose
+
+# The script handles everything automatically:
 # - Network setup and validation
-# - Disk partitioning and encryption
-# - Base system installation
-# - Desktop environment deployment
+# - Repository download and verification
+# - Complete system installation
+# - Desktop environment deployment  
 # - Security hardening
 # - Comprehensive test report generation
 ```
 
-### 2. Direct Development Setup
+### 💻 **Development Setup**
 
-Set up your development environment:
+For developers who want to modify the automation:
 
 ```bash
-# Clone repository
+# Clone repository for development
 git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
 cd lm_archlinux_desktop
 
-# Install dependencies (Arch Linux)
+# Install development dependencies (Arch Linux)
 sudo pacman -S ansible python python-pip git shellcheck
 pip install -r requirements.txt
 ansible-galaxy install -r configs/ansible/requirements.yml
 
-# Verify installation
-./scripts/deploy.sh --help
-make lint
-```
-
-### 3. Production Deployment
-
-Deploy to your actual system after VM testing:
-
-```bash
-# Boot from Arch Linux ISO on target computer
-# Run complete deployment:
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm_archlinux_desktop/main/scripts/deploy.sh | bash -s -- full
-
-# Or clone and deploy:
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
-./scripts/deploy.sh full
+# Run development commands
+make dev-setup    # Setup development tools
+make lint         # Check code quality  
+make vm-test      # VirtualBox testing guide
 ```
 
 ## 🛠️ Development
@@ -241,16 +278,18 @@ git push origin develop
 ### Available Commands
 
 ```bash
-# Development helpers
-make install         # Install dependencies
-make dev-setup      # Setup development tools
-make lint           # Run code quality checks
-make vm-test        # Run VirtualBox testing
+# Bootstrap deployment options
+./bootstrap.sh full              # Complete deployment
+./bootstrap.sh testing           # VirtualBox testing
+./bootstrap.sh desktop           # Desktop environment only
+./bootstrap.sh security          # Security hardening only
+./bootstrap.sh --dry-run full    # Preview actions
+./bootstrap.sh --verbose testing # Verbose output
 
-# Deployment options
-./scripts/deploy.sh full                    # Complete deployment
-./scripts/deploy.sh full --dry-run         # Preview actions
-./scripts/deploy.sh desktop --profile work # Profile-specific
+# Development helpers (after cloning repo)
+make dev-setup    # Setup development tools
+make lint         # Run code quality checks
+make vm-test      # VirtualBox testing guide
 ```
 
 ## 🧪 Testing
@@ -267,14 +306,15 @@ VirtualBox testing is the **primary and recommended** testing method:
 ### Testing Commands
 
 ```bash
-# Quick VM testing (in VM)
-./scripts/testing/auto_vm_test.sh
+# Bootstrap testing (recommended)
+./bootstrap.sh testing --verbose
 
-# Installation validation
-./scripts/testing/test_installation.sh
+# Dry run testing (preview only)
+./bootstrap.sh testing --dry-run
 
-# System health check
-./scripts/maintenance/health_check.sh
+# Advanced testing (after repo cloning)
+./scripts/testing/test_installation.sh  # Installation validation
+./scripts/maintenance/health_check.sh   # System health check
 ```
 
 ## 📚 Documentation
