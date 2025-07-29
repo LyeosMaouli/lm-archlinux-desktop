@@ -147,7 +147,7 @@ load_config() {
             HOSTNAME)
                 export DEPLOY_HOSTNAME="$value"
                 ;;
-            USERNAME)
+            USER_NAME)
                 export DEPLOY_USERNAME="$value"
                 ;;
             TIMEZONE)
@@ -198,7 +198,7 @@ BRANCH=main
 
 # System Configuration
 HOSTNAME=phoenix
-USERNAME=lyeosmaouli
+USER_NAME=lyeosmaouli
 TIMEZONE=Europe/Paris
 LOCALE=en_US.UTF-8
 KEYMAP=fr
