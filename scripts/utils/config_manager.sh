@@ -88,7 +88,7 @@ validate_bootstrap_config() {
     
     # Check required bootstrap fields
     local required_fields=(
-        "REPO_URL" "BRANCH" "HOSTNAME" "USER_NAME" "PROFILE"
+        "REPO_URL" "BRANCH" "HOSTNAME" "USER_NAME" "PROFILE" "PASSWORD_MODE"
     )
     
     for field in "${required_fields[@]}"; do
@@ -122,6 +122,12 @@ validate_bootstrap_config() {
         ((errors++))
     fi
     
+    # Validate password mode
+    if [[ ! "${PASSWORD_MODE:-}" =~ ^(env|file|generate|interactive)$ ]]; then
+        log_error "Invalid PASSWORD_MODE: ${PASSWORD_MODE:-}. Must be: env, file, generate, or interactive"
+        ((errors++))
+    fi
+    
     if [[ $errors -eq 0 ]]; then
         log_success "Bootstrap configuration validation passed"
         return 0
@@ -143,7 +149,7 @@ validate_deploy_config() {
     
     # Check required deployment fields
     local required_fields=(
-        "USER_NAME" "PASSWORD_MODE" "PROFILE" "HOSTNAME" 
+        "USER_NAME" "PROFILE" "HOSTNAME" 
         "DESKTOP_SESSION" "DISPLAY_MANAGER" "AUDIO_SYSTEM"
     )
     
@@ -153,12 +159,6 @@ validate_deploy_config() {
             ((errors++))
         fi
     done
-    
-    # Validate password mode
-    if [[ ! "${PASSWORD_MODE:-}" =~ ^(env|file|generate|interactive)$ ]]; then
-        log_error "Invalid PASSWORD_MODE: ${PASSWORD_MODE:-}. Must be: env, file, generate, or interactive"
-        ((errors++))
-    fi
     
     # Validate boolean values
     local boolean_fields=(

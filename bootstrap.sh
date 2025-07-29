@@ -162,6 +162,12 @@ load_config() {
             PROFILE)
                 export DEPLOY_PROFILE="$value"
                 ;;
+            PASSWORD_MODE)
+                export DEPLOY_PASSWORD_MODE="$value"
+                ;;
+            PASSWORD_FILE)
+                export DEPLOY_PASSWORD_FILE="$value"
+                ;;
             ENABLE_ENCRYPTION)
                 export DEPLOY_ENCRYPTION="$value"
                 ;;
@@ -213,10 +219,8 @@ ENABLE_ENCRYPTION=true
 AUTO_REBOOT=true
 
 # Password Management
-# Leave empty to use interactive prompts or auto-generation
-USER_PASSWORD=
-ROOT_PASSWORD=
-ENCRYPTION_PASSPHRASE=
+PASSWORD_MODE=generate
+PASSWORD_FILE=passwords.enc
 
 # Network Configuration (usually auto-detected)
 WIFI_SSID=
@@ -415,11 +419,15 @@ run_deployment() {
     fi
     
     # Set password mode based on configuration
-    if [[ -n "${USER_PASSWORD:-}" ]]; then
-        export DEPLOY_USER_PASSWORD="$USER_PASSWORD"
-        deploy_cmd="$deploy_cmd --password env"
+    if [[ -n "${DEPLOY_PASSWORD_MODE:-}" ]]; then
+        deploy_cmd="$deploy_cmd --password '$DEPLOY_PASSWORD_MODE'"
     else
         deploy_cmd="$deploy_cmd --password generate"
+    fi
+    
+    # Add password file if specified
+    if [[ -n "${DEPLOY_PASSWORD_FILE:-}" ]]; then
+        deploy_cmd="$deploy_cmd --password-file '$DEPLOY_PASSWORD_FILE'"
     fi
     
     info "Executing: $deploy_cmd"
