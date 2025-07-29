@@ -1,9 +1,9 @@
 ---
-# work Profile Configuration
+# development Profile Configuration
 # Generated from config/deploy.conf - DO NOT EDIT MANUALLY
 
-profile_name: "work"
-profile_type: "WORK"
+profile_name: "development"
+profile_type: "DEVELOPMENT"
 
 # System Configuration
 system:

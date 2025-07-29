@@ -1,9 +1,9 @@
 ---
-# work Profile Configuration
+# personal Profile Configuration
 # Generated from config/deploy.conf - DO NOT EDIT MANUALLY
 
-profile_name: "work"
-profile_type: "WORK"
+profile_name: "personal"
+profile_type: "PERSONAL"
 
 # System Configuration
 system:

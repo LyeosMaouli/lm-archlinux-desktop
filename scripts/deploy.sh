@@ -600,17 +600,6 @@ EOF
 #
 
 load_configuration() {
-    # Check if master configuration exists and suggest using config manager
-    local master_config="$CONFIG_DIR/deployment.conf"
-    if [[ -f "$master_config" ]]; then
-        local generated_config="$CONFIG_DIR/deploy.conf"
-        if [[ ! -f "$generated_config" ]] || [[ "$master_config" -nt "$generated_config" ]]; then
-            log_warning "Master configuration detected but current config is missing or outdated"
-            log_info "Run './scripts/utils/config_manager.sh generate' to update configuration files"
-            log_info "Or use 'make config-generate' for unified configuration management"
-        fi
-    fi
-    
     # Load from config file if it exists
     if [[ -n "${CONFIG_FILE:-}" ]]; then
         if ! load_config "$CONFIG_FILE"; then
