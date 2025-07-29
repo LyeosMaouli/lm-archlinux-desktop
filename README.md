@@ -27,6 +27,7 @@
 ### Key Improvements
 
 - ✅ **2-File Bootstrap**: Download only `bootstrap.sh` + `bootstrap.conf` - that's it!
+- ✅ **Unified Configuration**: Single source of truth eliminates redundant configuration parameters
 - ✅ **Zero Typing Errors**: No more long curl commands or complex URLs
 - ✅ **Auto-Everything**: Automatic dependency installation, repo download, and verification
 - ✅ **Edit & Run**: Simple config file editing + single command deployment
@@ -124,6 +125,13 @@ Simplified development approach for maximum productivity:
 - **Git Configuration** - Development workflow setup
 - **Language Support** - Python, Node.js, Rust, Go ready
 - **Terminal Tools** - Enhanced CLI experience
+
+### ⚙️ Unified Configuration System
+
+- **Single Source of Truth** - All configuration in `config/deployment.conf`
+- **Auto-Generated Files** - Bootstrap, Ansible, and other configs generated automatically
+- **Validation System** - Built-in configuration validation and error checking
+- **Easy Maintenance** - Update once, deploy everywhere consistently
 
 ### ⚡ Power Management & Performance
 
