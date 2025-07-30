@@ -32,6 +32,10 @@ VERBOSE=false
 DRY_RUN=false
 SKIP_VERIFICATION=false
 
+# Password management variables
+DECRYPTED_PASSWORD=""
+ENC_FILE_PATH=""
+
 # Logging setup
 setup_logging() {
     mkdir -p "$(dirname "$LOG_FILE")"
@@ -240,6 +244,75 @@ EOF
     info "Please edit this file with your preferences before running the deployment"
 }
 
+# Validate password file handling
+validate_password_file() {
+    # Only run this check if PASSWORD_MODE is set to "file"
+    if [[ "${DEPLOY_PASSWORD_MODE:-}" != "file" ]]; then
+        return 0
+    fi
+    
+    info "Validating encrypted password file for PASSWORD_MODE=file..."
+    
+    # Find all .enc files in current directory
+    local enc_files=()
+    while IFS= read -r -d '' enc_file; do
+        enc_files+=("$enc_file")
+    done < <(find . -maxdepth 1 -name "*.enc" -type f -print0 2>/dev/null)
+    
+    local enc_count=${#enc_files[@]}
+    
+    if [[ $enc_count -eq 0 ]]; then
+        error "PASSWORD_MODE=file but no .enc files found in current directory.
+        
+Please either:
+1. Generate an encrypted password file using GitHub Actions:
+   - Go to your repository's Actions tab
+   - Run the 'Create Encrypted Password File' workflow
+   - Download the generated password.enc file to this directory
+   
+2. Change PASSWORD_MODE in bootstrap.conf to 'generate':
+   - Edit bootstrap.conf and set: PASSWORD_MODE=generate
+   - This will auto-generate secure passwords during deployment"
+    fi
+    
+    if [[ $enc_count -gt 1 ]]; then
+        error "Multiple .enc files found in current directory: ${enc_files[*]}
+        
+Please keep only ONE encrypted password file and remove the others.
+The bootstrap script needs exactly one .enc file to proceed."
+    fi
+    
+    # Exactly one .enc file found
+    ENC_FILE_PATH="${enc_files[0]}"
+    local enc_filename=$(basename "$ENC_FILE_PATH")
+    
+    success "Found encrypted password file: $enc_filename"
+    
+    # Prompt user for decryption password
+    echo
+    info "Decrypting password file..."
+    echo -n "Enter decryption password for $enc_filename: "
+    read -s decryption_key
+    echo
+    
+    # Attempt to decrypt the file
+    if command -v openssl >/dev/null 2>&1; then
+        # Try to decrypt using OpenSSL
+        DECRYPTED_PASSWORD=$(openssl enc -aes-256-cbc -d -in "$ENC_FILE_PATH" -pass pass:"$decryption_key" 2>/dev/null)
+        if [[ $? -ne 0 ]] || [[ -z "$DECRYPTED_PASSWORD" ]]; then
+            error "Failed to decrypt password file. Please check your decryption password."
+        fi
+    else
+        error "OpenSSL not available for password file decryption. Please install openssl package."
+    fi
+    
+    success "Password file decrypted successfully"
+    
+    # Clear the decryption key from memory
+    decryption_key=""
+    unset decryption_key
+}
+
 # Verify system prerequisites
 verify_prerequisites() {
     info "Verifying system prerequisites..."
@@ -312,6 +385,27 @@ download_repository() {
     
     cd automation
     success "Repository downloaded successfully"
+}
+
+# Copy encrypted password file to project root
+copy_password_file() {
+    # Only copy if we have a password file and it was decrypted successfully
+    if [[ -n "$ENC_FILE_PATH" ]] && [[ -n "$DECRYPTED_PASSWORD" ]]; then
+        local enc_filename=$(basename "$ENC_FILE_PATH")
+        local target_path="./$enc_filename"
+        
+        info "Copying encrypted password file to project root..."
+        
+        # Copy the .enc file to the project root directory
+        cp "$ENC_FILE_PATH" "$target_path" || error "Failed to copy password file to project root"
+        
+        success "Copied $enc_filename to project root directory"
+        
+        # Update the environment variable to point to the copied file
+        export DEPLOY_PASSWORD_FILE="$enc_filename"
+        
+        info "Updated DEPLOY_PASSWORD_FILE to: $enc_filename"
+    fi
 }
 
 # Verify repository integrity
@@ -430,6 +524,12 @@ run_deployment() {
         deploy_cmd="$deploy_cmd --password-file '$DEPLOY_PASSWORD_FILE'"
     fi
     
+    # Export decrypted password if available
+    if [[ -n "$DECRYPTED_PASSWORD" ]]; then
+        export DEPLOY_USER_PASSWORD="$DECRYPTED_PASSWORD"
+        info "Password from encrypted file will be passed to deploy.sh"
+    fi
+    
     info "Executing: $deploy_cmd"
     
     if [[ "$DRY_RUN" == true ]]; then
@@ -517,10 +617,17 @@ main() {
     # Load configuration
     load_config "$CONFIG_FILE"
     
+    # Validate password file if needed (before downloading repository)
+    validate_password_file
+    
     # Run deployment steps
     verify_prerequisites
     download_repository
     verify_repository
+    
+    # Copy password file to project root after repository download
+    copy_password_file
+    
     run_deployment
     
     # Final message
