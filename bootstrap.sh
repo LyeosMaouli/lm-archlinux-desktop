@@ -295,12 +295,46 @@ The bootstrap script needs exactly one .enc file to proceed."
     read -s decryption_key
     echo
     
-    # Attempt to decrypt the file
+    # Attempt to decrypt the file using the proper format
     if command -v openssl >/dev/null 2>&1; then
-        # Try to decrypt using OpenSSL
-        DECRYPTED_PASSWORD=$(openssl enc -aes-256-cbc -d -in "$ENC_FILE_PATH" -pass pass:"$decryption_key" 2>/dev/null)
-        if [[ $? -ne 0 ]] || [[ -z "$DECRYPTED_PASSWORD" ]]; then
-            error "Failed to decrypt password file. Please check your decryption password."
+        # Check if this is a properly formatted encrypted password file
+        if ! grep -q "^# ENCRYPTED PASSWORD FILE" "$ENC_FILE_PATH"; then
+            error "Invalid password file format. The file must be created using the project's password management system."
+        fi
+        
+        # Extract metadata
+        local cipher iterations
+        cipher=$(grep "^# CIPHER:" "$ENC_FILE_PATH" | cut -d' ' -f3)
+        iterations=$(grep "^# ITERATIONS:" "$ENC_FILE_PATH" | cut -d' ' -f3)
+        
+        # Use defaults if metadata not found
+        cipher="${cipher:-aes-256-cbc}"
+        iterations="${iterations:-100000}"
+        
+        # Extract encrypted data (skip metadata lines)
+        local encrypted_data
+        encrypted_data=$(grep -v '^#' "$ENC_FILE_PATH" | tr -d '\n')
+        
+        if [[ -z "$encrypted_data" ]]; then
+            error "No encrypted data found in password file."
+        fi
+        
+        # Decrypt using the proper method
+        local temp_file="/tmp/bootstrap_decrypt_$$"
+        trap 'rm -f "$temp_file" 2>/dev/null' RETURN
+        
+        if echo "$encrypted_data" | base64 -d | \
+           openssl enc -d "-$cipher" -pbkdf2 -iter "$iterations" -pass pass:"$decryption_key" \
+           > "$temp_file" 2>/dev/null; then
+            
+            # Extract the user password from the decrypted content
+            DECRYPTED_PASSWORD=$(grep "^user_password=" "$temp_file" | cut -d'=' -f2)
+            
+            if [[ -z "$DECRYPTED_PASSWORD" ]]; then
+                error "No user password found in decrypted file. File may be corrupted."
+            fi
+        else
+            error "Failed to decrypt password file. Please verify your decryption password is correct."
         fi
     else
         error "OpenSSL not available for password file decryption. Please install openssl package."
