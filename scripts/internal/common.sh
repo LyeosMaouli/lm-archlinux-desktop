@@ -322,16 +322,21 @@ install_missing_deps() {
     if [[ -d "/run/archiso/cowspace" ]]; then
         log_info "Detected Arch ISO environment - proactively expanding cowspace..."
         local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
-        local cowspace_size="8G"  # Default size
+        local cowspace_size="${COWSPACE_SIZE:-}"  # Allow user override
         
-        if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
-            cowspace_size="12G"
-        elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
-            cowspace_size="8G" 
-        elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM
-            cowspace_size="4G"
-        else  # Less than 2GB RAM
-            cowspace_size="2G"
+        # If no user override, calculate based on RAM
+        if [[ -z "$cowspace_size" ]]; then
+            if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
+                cowspace_size="16G"  # Increased for full desktop + development
+            elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
+                cowspace_size="12G"  # Increased for desktop installation
+            elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM
+                cowspace_size="8G"   # Increased for base + desktop
+            else  # Less than 2GB RAM
+                cowspace_size="4G"   # Increased minimum for base system
+            fi
+        else
+            log_info "Using user-specified cowspace size: $cowspace_size"
         fi
         
         if sudo mount -o remount,size=$cowspace_size /run/archiso/cowspace 2>/dev/null; then
@@ -354,16 +359,19 @@ install_missing_deps() {
         if [[ -d "/run/archiso/cowspace" ]]; then
             # Determine optimal cowspace size based on available RAM
             local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
-            local cowspace_size="8G"  # Default size
+            local cowspace_size="${COWSPACE_SIZE:-}"  # Allow user override
             
-            if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
-                cowspace_size="12G"
-            elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
-                cowspace_size="8G"
-            elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM  
-                cowspace_size="4G"
-            else  # Less than 2GB RAM
-                cowspace_size="2G"
+            # If no user override, calculate based on RAM
+            if [[ -z "$cowspace_size" ]]; then
+                if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
+                    cowspace_size="16G"  # Increased for full desktop + development
+                elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
+                    cowspace_size="12G"  # Increased for desktop installation
+                elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM  
+                    cowspace_size="8G"   # Increased for base + desktop
+                else  # Less than 2GB RAM
+                    cowspace_size="4G"   # Increased minimum for base system
+                fi
             fi
             
             log_info "Expanding Arch ISO cowspace to $cowspace_size (RAM: ${ram_mb}MB)..."
