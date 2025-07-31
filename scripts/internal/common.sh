@@ -322,9 +322,9 @@ install_missing_deps() {
     if [[ -d "/run/archiso/cowspace" ]]; then
         log_info "Detected Arch ISO environment - proactively expanding cowspace..."
         local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
-        local cowspace_size="${COWSPACE_SIZE:-}"  # Allow user override
+        local cowspace_size="${COWSPACE_SIZE:-}"  # Read from config or environment
         
-        # If no user override, calculate based on RAM
+        # If no configuration specified, calculate based on RAM
         if [[ -z "$cowspace_size" ]]; then
             if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
                 cowspace_size="16G"  # Increased for full desktop + development
@@ -336,11 +336,13 @@ install_missing_deps() {
                 cowspace_size="4G"   # Increased minimum for base system
             fi
         else
-            log_info "Using user-specified cowspace size: $cowspace_size"
+            log_info "Using configured cowspace size: $cowspace_size"
         fi
         
+        log_info "Cowspace configuration: $cowspace_size (RAM: ${ram_mb}MB available)"
+        
         if sudo mount -o remount,size=$cowspace_size /run/archiso/cowspace 2>/dev/null; then
-            log_success "Proactively expanded cowspace to $cowspace_size (RAM: ${ram_mb}MB)"
+            log_success "Successfully expanded cowspace to $cowspace_size"
         else
             log_warn "Proactive cowspace expansion failed - will try again if needed"
         fi
@@ -359,9 +361,9 @@ install_missing_deps() {
         if [[ -d "/run/archiso/cowspace" ]]; then
             # Determine optimal cowspace size based on available RAM
             local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
-            local cowspace_size="${COWSPACE_SIZE:-}"  # Allow user override
+            local cowspace_size="${COWSPACE_SIZE:-}"  # Read from config or environment
             
-            # If no user override, calculate based on RAM
+            # If no configuration specified, calculate based on RAM
             if [[ -z "$cowspace_size" ]]; then
                 if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
                     cowspace_size="16G"  # Increased for full desktop + development
