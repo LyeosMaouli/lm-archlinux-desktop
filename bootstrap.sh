@@ -22,7 +22,7 @@ DEFAULT_REPO_URL="https://github.com/LyeosMaouli/lm-archlinux-desktop.git"
 DEFAULT_BRANCH="main"
 WORK_DIR="/tmp/arch_automation_$$"
 CONFIG_FILE="bootstrap.conf"
-LOG_FILE="/var/log/bootstrap.log"
+LOG_FILE="./logs/bootstrap.log"
 
 # Runtime variables
 REPO_URL=""
