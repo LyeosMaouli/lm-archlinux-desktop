@@ -143,8 +143,8 @@ disk:
     enabled: true
     passphrase: "test123"  # Simple passphrase for testing
   partitions:
-    efi_size: "512M"
-    swap_size: "2G"  # Smaller for VM
+    efi_size: "256M"  # Reduced EFI size to save space
+    # Note: No swap partition - using zram instead
   filesystem: "ext4"
 
 # Bootloader Configuration

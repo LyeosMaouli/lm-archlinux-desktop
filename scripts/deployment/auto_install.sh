@@ -313,7 +313,7 @@ setup_partitions() {
     local efi_size=$(parse_nested_config "disk" "efi_size")
     
     if [[ -z "${efi_size:-}" ]]; then
-        efi_size="512M"
+        efi_size="256M"  # Conservative EFI size to maximize root partition space
     fi
     
     info "Setting up partitions on $disk_device..."
@@ -806,10 +806,29 @@ install_base_system() {
     # Add XferCommand in the [options] section
     sed -i '/^ParallelDownloads/a XferCommand = /usr/bin/curl -L -C - -f --retry 5 --retry-delay 3 --connect-timeout 60 -o %o %u' /etc/pacman.conf
     
+    # Clean package cache to free up space
+    info "Cleaning package cache to free up space..."
+    pacman -Scc --noconfirm || warn "Failed to clean package cache"
+    
+    # Check available disk space before installation
+    info "Checking available disk space..."
+    local available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
+    local available_space_gb=$((available_space_kb / 1024 / 1024))
+    info "Available space in /mnt: ${available_space_gb}GB"
+    
+    if [[ $available_space_gb -lt 5 ]]; then
+        error "Insufficient disk space for installation (${available_space_gb}GB < 5GB required)"
+        error "Available space breakdown:"
+        df -h /mnt
+        lsblk
+        return 1
+    fi
+    
     # Try pacstrap with better error handling and diagnostics
     info "Starting package installation with pacstrap..."
     echo "=== PACSTRAP INSTALLATION ATTEMPT ===" >> "$VERBOSE_LOG"
     echo "Target: /mnt" >> "$VERBOSE_LOG"
+    echo "Available space: ${available_space_gb}GB" >> "$VERBOSE_LOG"
     echo "Packages: base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode" >> "$VERBOSE_LOG"
     echo "Mirror list being used:" >> "$VERBOSE_LOG"
     cat /etc/pacman.d/mirrorlist >> "$VERBOSE_LOG" 2>&1
