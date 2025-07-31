@@ -1191,7 +1191,16 @@ ${BOLD}Mode:${NC}         ${YELLOW}DRY RUN (preview only)${NC}" || echo "")"
     
     # Pre-flight checks
     check_system_requirements
-    check_dependencies
+    
+    # Check dependencies with fallback handling
+    if ! check_dependencies; then
+        if [[ "${FALLBACK_TO_DIRECT_INSTALL:-}" == "true" ]]; then
+            log_warn "Ansible unavailable due to space constraints - using direct installation method"
+        else
+            log_error "Dependency check failed - cannot proceed"
+            exit 12
+        fi
+    fi
     
     # Execute requested command
     case ${COMMAND:-} in
