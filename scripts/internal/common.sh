@@ -318,51 +318,147 @@ install_missing_deps() {
     # Critical: Free up space in live ISO environment before package installation
     log_info "Checking and optimizing live system space before package installation..."
     
+    # Proactively expand cowspace if in Arch ISO environment
+    if [[ -d "/run/archiso/cowspace" ]]; then
+        log_info "Detected Arch ISO environment - proactively expanding cowspace..."
+        local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+        local cowspace_size="${COWSPACE_SIZE:-}"  # Read from config or environment
+        
+        # If no configuration specified, calculate based on RAM
+        if [[ -z "$cowspace_size" ]]; then
+            if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
+                cowspace_size="16G"  # Increased for full desktop + development
+            elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
+                cowspace_size="12G"  # Increased for desktop installation
+            elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM
+                cowspace_size="8G"   # Increased for base + desktop
+            else  # Less than 2GB RAM
+                cowspace_size="4G"   # Increased minimum for base system
+            fi
+        else
+            log_info "Using configured cowspace size: $cowspace_size"
+        fi
+        
+        log_info "Cowspace configuration: $cowspace_size (RAM: ${ram_mb}MB available)"
+        
+        if sudo mount -o remount,size=$cowspace_size /run/archiso/cowspace 2>/dev/null; then
+            log_success "Successfully expanded cowspace to $cowspace_size"
+        else
+            log_warn "Proactive cowspace expansion failed - will try again if needed"
+        fi
+    fi
+    
     # Show current space status
     local available_space_kb=$(df / | tail -1 | awk '{print $4}')
     local available_space_mb=$((available_space_kb / 1024))
     log_info "Current root filesystem space: ${available_space_mb}MB available"
     
-    # If space is critically low, perform aggressive cleanup
+    # If space is critically low, expand the live ISO cowspace first
     if [[ $available_space_mb -lt 1024 ]]; then  # Less than 1GB available
-        log_warn "Critical space shortage detected (${available_space_mb}MB). Performing emergency cleanup..."
+        log_warn "Critical space shortage detected (${available_space_mb}MB). Expanding live ISO cowspace..."
         
-        # Clean pacman cache aggressively
-        log_info "Cleaning pacman cache..."
-        sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
-        
-        # Clean temporary files
-        log_info "Cleaning temporary files..."
-        sudo rm -rf /tmp/* /var/tmp/* >/dev/null 2>&1 || true
-        
-        # Clean systemd journal logs
-        log_info "Cleaning system logs..."
-        sudo journalctl --vacuum-size=10M >/dev/null 2>&1 || true
-        
-        # Clean man pages and documentation (live system only)
-        log_info "Removing documentation to free space..."
-        sudo rm -rf /usr/share/man/* /usr/share/doc/* >/dev/null 2>&1 || true
-        
-        # Clean locale files except English
-        log_info "Cleaning unused locales..."
-        sudo find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en*' -exec rm -rf {} + >/dev/null 2>&1 || true
-        
-        # Recheck space after cleanup
-        available_space_kb=$(df / | tail -1 | awk '{print $4}')
-        available_space_mb=$((available_space_kb / 1024))
-        log_info "Space after cleanup: ${available_space_mb}MB available"
-        
-        if [[ $available_space_mb -lt 512 ]]; then  # Still less than 512MB
-            log_error "Insufficient space even after cleanup (${available_space_mb}MB)"
-            log_error "This indicates the live ISO environment is too small for this operation"
-            log_error "Consider:"
-            log_error "  1. Using a newer Arch ISO with more space"
-            log_error "  2. Running installation from a system with more disk space"
-            log_error "  3. Mounting additional storage for temporary use"
-            return 1
+        # Primary solution: Expand the Arch ISO cowspace
+        if [[ -d "/run/archiso/cowspace" ]]; then
+            # Determine optimal cowspace size based on available RAM
+            local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+            local cowspace_size="${COWSPACE_SIZE:-}"  # Read from config or environment
+            
+            # If no configuration specified, calculate based on RAM
+            if [[ -z "$cowspace_size" ]]; then
+                if [[ $ram_mb -ge 8192 ]]; then  # 8GB+ RAM
+                    cowspace_size="16G"  # Increased for full desktop + development
+                elif [[ $ram_mb -ge 4096 ]]; then  # 4GB+ RAM
+                    cowspace_size="12G"  # Increased for desktop installation
+                elif [[ $ram_mb -ge 2048 ]]; then  # 2GB+ RAM  
+                    cowspace_size="8G"   # Increased for base + desktop
+                else  # Less than 2GB RAM
+                    cowspace_size="4G"   # Increased minimum for base system
+                fi
+            fi
+            
+            log_info "Expanding Arch ISO cowspace to $cowspace_size (RAM: ${ram_mb}MB)..."
+            if sudo mount -o remount,size=$cowspace_size /run/archiso/cowspace 2>/dev/null; then
+                log_success "Successfully expanded cowspace to $cowspace_size"
+                
+                # Check space after cowspace expansion
+                available_space_kb=$(df / | tail -1 | awk '{print $4}')
+                available_space_mb=$((available_space_kb / 1024))
+                log_info "Space after cowspace expansion: ${available_space_mb}MB available"
+                
+                if [[ $available_space_mb -gt 2048 ]]; then  # More than 2GB now available
+                    log_success "Cowspace expansion successful - sufficient space now available"
+                else
+                    log_warn "Cowspace expansion helped but space still limited (${available_space_mb}MB)"
+                fi
+            else
+                log_warn "Failed to expand cowspace - falling back to cleanup methods"
+                # Fall back to cleanup methods if cowspace expansion fails
+                _perform_aggressive_cleanup
+            fi
+        else
+            log_warn "Not running in Arch ISO environment - using cleanup methods"
+            # Fall back to cleanup methods if not in Arch ISO
+            _perform_aggressive_cleanup
         fi
     fi
+}
+
+# Fallback cleanup function for non-Arch ISO environments or when cowspace expansion fails
+_perform_aggressive_cleanup() {
+    log_info "Performing aggressive cleanup methods..."
     
+    # Clean pacman cache aggressively
+    log_info "Cleaning pacman cache..."
+    sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
+    
+    # Clean temporary files
+    log_info "Cleaning temporary files..."
+    sudo rm -rf /tmp/* /var/tmp/* >/dev/null 2>&1 || true
+    
+    # Clean systemd journal logs
+    log_info "Cleaning system logs..."
+    sudo journalctl --vacuum-size=10M >/dev/null 2>&1 || true
+    
+    # Clean man pages and documentation (live system only)
+    log_info "Removing documentation to free space..."
+    sudo rm -rf /usr/share/man/* /usr/share/doc/* >/dev/null 2>&1 || true
+    
+    # Clean locale files except English
+    log_info "Cleaning unused locales..."
+    sudo find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en*' -exec rm -rf {} + >/dev/null 2>&1 || true
+    
+    # Recheck space after cleanup
+    local available_space_kb=$(df / | tail -1 | awk '{print $4}')
+    local available_space_mb=$((available_space_kb / 1024))
+    log_info "Space after cleanup: ${available_space_mb}MB available"
+    
+    if [[ $available_space_mb -lt 512 ]]; then  # Still less than 512MB
+        log_error "Insufficient space even after cleanup (${available_space_mb}MB)"
+        log_error "This indicates the live ISO environment is too small for this operation"
+        log_error "Consider:"
+        log_error "  1. Using a newer Arch ISO with more space"
+        log_error "  2. Running installation from a system with more disk space"
+        log_error "  3. Mounting additional storage for temporary use"
+        return 1
+    fi
+}
+
+# Emergency cleanup function for critical space situations
+_perform_emergency_cleanup() {
+    log_info "Performing emergency cleanup..."
+    sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
+    sudo rm -rf /tmp/* /var/tmp/* /var/cache/* >/dev/null 2>&1 || true
+    sudo journalctl --vacuum-size=5M >/dev/null 2>&1 || true
+    sudo rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/gtk-doc/* >/dev/null 2>&1 || true
+    sudo rm -rf /usr/share/locale/[^e]* >/dev/null 2>&1 || true  # Keep only English
+    sudo find /usr/lib -name "*.a" -delete >/dev/null 2>&1 || true  # Remove static libraries
+    
+    # Check space after emergency cleanup
+    local available_space_kb=$(df / | tail -1 | awk '{print $4}')
+    local available_space_mb=$((available_space_kb / 1024))
+    log_info "Space after emergency cleanup: ${available_space_mb}MB"
+}
+
     # Update package database
     log_info "Updating package database..."
     if ! sudo pacman -Sy --noconfirm 2>/dev/null; then
@@ -412,19 +508,22 @@ install_missing_deps() {
                 log_info "The Arch Linux live ISO root filesystem is too small"
                 log_info "Emergency space recovery actions:"
                 
-                # Perform aggressive emergency cleanup
-                log_info "Performing emergency space cleanup..."
-                sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
-                sudo rm -rf /tmp/* /var/tmp/* /var/cache/* >/dev/null 2>&1 || true
-                sudo journalctl --vacuum-size=5M >/dev/null 2>&1 || true
-                sudo rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/gtk-doc/* >/dev/null 2>&1 || true
-                sudo rm -rf /usr/share/locale/[^e]* >/dev/null 2>&1 || true  # Keep only English
-                sudo find /usr/lib -name "*.a" -delete >/dev/null 2>&1 || true  # Remove static libraries
-                
-                # Check space after emergency cleanup
-                available_space_kb=$(df / | tail -1 | awk '{print $4}')
-                available_space_mb=$((available_space_kb / 1024))
-                log_info "Space after emergency cleanup: ${available_space_mb}MB"
+                # Try cowspace expansion first, then fallback to cleanup
+                if [[ -d "/run/archiso/cowspace" ]]; then
+                    log_info "Attempting emergency cowspace expansion..."
+                    if sudo mount -o remount,size=8G /run/archiso/cowspace 2>/dev/null; then
+                        log_success "Emergency cowspace expansion successful"
+                        available_space_kb=$(df / | tail -1 | awk '{print $4}')
+                        available_space_mb=$((available_space_kb / 1024))
+                        log_info "Space after cowspace expansion: ${available_space_mb}MB"
+                    else
+                        log_warn "Cowspace expansion failed - trying cleanup methods"
+                        _perform_emergency_cleanup
+                    fi
+                else
+                    log_info "Not in Arch ISO environment - using cleanup methods"
+                    _perform_emergency_cleanup
+                fi
                 
             elif echo "$pacman_output" | grep -q "target not found"; then
                 log_error "Some packages were not found in repositories"
