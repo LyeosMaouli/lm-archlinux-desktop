@@ -10,7 +10,7 @@
 # Global configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-readonly LOG_DIR="$PROJECT_ROOT/logs"
+readonly LOG_DIR="/var/log"
 readonly CONFIG_DIR="$PROJECT_ROOT/config"
 readonly CACHE_DIR="$PROJECT_ROOT/.cache"
 

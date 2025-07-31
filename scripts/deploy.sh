@@ -61,7 +61,7 @@ if [[ "${COMMON_LOADED:-}" != "true" ]]; then
     
     # Basic logging functions as fallback
     if [[ -z "${LOG_DIR:-}" ]]; then
-        LOG_DIR="$(pwd)/logs"
+        LOG_DIR="/var/log"
     fi
     mkdir -p "$LOG_DIR"
     if [[ -z "${LOG_FILE:-}" ]]; then
