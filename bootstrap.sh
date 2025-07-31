@@ -286,7 +286,7 @@ The bootstrap script needs exactly one .enc file to proceed."
     fi
     
     # Exactly one .enc file found
-    ENC_FILE_PATH="${enc_files[0]}"
+    ENC_FILE_PATH="$(realpath "${enc_files[0]}")"
     local enc_filename=$(basename "$ENC_FILE_PATH")
     
     success "Found encrypted password file: $enc_filename"
