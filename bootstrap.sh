@@ -298,46 +298,86 @@ The bootstrap script needs exactly one .enc file to proceed."
     read -s decryption_key
     echo
     
-    # Attempt to decrypt the file using the proper format
+    # Attempt to decrypt the file using supported formats
     if command -v openssl >/dev/null 2>&1; then
-        # Check if this is a properly formatted encrypted password file
-        if ! grep -q "^# ENCRYPTED PASSWORD FILE" "$ENC_FILE_PATH"; then
-            error "Invalid password file format. The file must be created using the project's password management system."
-        fi
-        
-        # Extract metadata
-        local cipher iterations
-        cipher=$(grep "^# CIPHER:" "$ENC_FILE_PATH" | cut -d' ' -f3)
-        iterations=$(grep "^# ITERATIONS:" "$ENC_FILE_PATH" | cut -d' ' -f3)
-        
-        # Use defaults if metadata not found
-        cipher="${cipher:-aes-256-cbc}"
-        iterations="${iterations:-100000}"
-        
-        # Extract encrypted data (skip metadata lines)
-        local encrypted_data
-        encrypted_data=$(grep -v '^#' "$ENC_FILE_PATH" | tr -d '\n')
-        
-        if [[ -z "$encrypted_data" ]]; then
-            error "No encrypted data found in password file."
-        fi
-        
-        # Decrypt using the proper method
         local temp_file="/tmp/bootstrap_decrypt_$$"
         trap 'rm -f "$temp_file" 2>/dev/null' RETURN
         
-        if echo "$encrypted_data" | base64 -d | \
-           openssl enc -d "-$cipher" -pbkdf2 -iter "$iterations" -pass pass:"$decryption_key" \
-           > "$temp_file" 2>/dev/null; then
+        # Check if this is a properly formatted encrypted password file (project native format)
+        if grep -q "^# ENCRYPTED PASSWORD FILE" "$ENC_FILE_PATH"; then
+            info "Detected project native password file format"
             
-            # Extract the user password from the decrypted content
-            DECRYPTED_PASSWORD=$(grep "^user_password=" "$temp_file" | cut -d'=' -f2)
+            # Extract metadata
+            local cipher iterations
+            cipher=$(grep "^# CIPHER:" "$ENC_FILE_PATH" | cut -d' ' -f3)
+            iterations=$(grep "^# ITERATIONS:" "$ENC_FILE_PATH" | cut -d' ' -f3)
             
-            if [[ -z "$DECRYPTED_PASSWORD" ]]; then
-                error "No user password found in decrypted file. File may be corrupted."
+            # Use defaults if metadata not found
+            cipher="${cipher:-aes-256-cbc}"
+            iterations="${iterations:-100000}"
+            
+            # Extract encrypted data (skip metadata lines)
+            local encrypted_data
+            encrypted_data=$(grep -v '^#' "$ENC_FILE_PATH" | tr -d '\n')
+            
+            if [[ -z "$encrypted_data" ]]; then
+                error "No encrypted data found in password file."
             fi
+            
+            # Decrypt using the proper method
+            if echo "$encrypted_data" | base64 -d | \
+               openssl enc -d "-$cipher" -pbkdf2 -iter "$iterations" -pass pass:"$decryption_key" \
+               > "$temp_file" 2>/dev/null; then
+                
+                # Extract the user password from the decrypted content
+                DECRYPTED_PASSWORD=$(grep "^user_password=" "$temp_file" | cut -d'=' -f2)
+                
+                if [[ -z "$DECRYPTED_PASSWORD" ]]; then
+                    error "No user password found in decrypted file. File may be corrupted."
+                fi
+            else
+                error "Failed to decrypt password file. Please verify your decryption password is correct."
+            fi
+            
         else
-            error "Failed to decrypt password file. Please verify your decryption password is correct."
+            # Try GitHub Actions workflow format (direct OpenSSL encryption)
+            info "Attempting GitHub Actions workflow password file format"
+            
+            # Try to decrypt using standard AES-256-CBC with PBKDF2 (GitHub Actions format)
+            if openssl enc -d -aes-256-cbc -salt -pbkdf2 -iter 100000 \
+               -in "$ENC_FILE_PATH" -pass pass:"$decryption_key" \
+               > "$temp_file" 2>/dev/null; then
+                
+                info "Successfully decrypted GitHub Actions format password file"
+                
+                # Check if it's an env format file (starts with #!/bin/bash)
+                if grep -q "^#!/bin/bash" "$temp_file" || grep -q "^export DEPLOY_USER_PASSWORD=" "$temp_file"; then
+                    # Extract user password from env format
+                    DECRYPTED_PASSWORD=$(grep "^export DEPLOY_USER_PASSWORD=" "$temp_file" | cut -d'"' -f2)
+                    if [[ -z "$DECRYPTED_PASSWORD" ]]; then
+                        DECRYPTED_PASSWORD=$(grep "^export DEPLOY_USER_PASSWORD=" "$temp_file" | cut -d'=' -f2 | tr -d '"'"'"'')
+                    fi
+                # Check if it's a YAML format file
+                elif grep -q "user_password:" "$temp_file"; then
+                    DECRYPTED_PASSWORD=$(grep "user_password:" "$temp_file" | cut -d'"' -f2)
+                # Check if it's a JSON format file
+                elif grep -q '"user_password"' "$temp_file"; then
+                    DECRYPTED_PASSWORD=$(grep '"user_password"' "$temp_file" | cut -d'"' -f4)
+                else
+                    error "Unsupported password file content format. Expected env, YAML, or JSON format."
+                fi
+                
+                if [[ -z "$DECRYPTED_PASSWORD" ]]; then
+                    error "No user password found in decrypted file. File may be corrupted or in unsupported format."
+                fi
+                
+            else
+                error "Failed to decrypt password file. Please verify your decryption password is correct.
+                
+Supported formats:
+1. Project native format (created by scripts/utils/passwords.sh)
+2. GitHub Actions workflow format (AES-256-CBC with PBKDF2)"
+            fi
         fi
     else
         error "OpenSSL not available for password file decryption. Please install openssl package."
