@@ -22,7 +22,7 @@ DEFAULT_REPO_URL="https://github.com/LyeosMaouli/lm-archlinux-desktop.git"
 DEFAULT_BRANCH="main"
 WORK_DIR="/tmp/arch_automation_$$"
 CONFIG_FILE="bootstrap.conf"
-LOG_FILE="./logs/bootstrap.log"
+LOG_FILE="./logs/bootstrap_$(date '+%Y%m%d_%H%M%S').log"
 
 # Runtime variables
 REPO_URL=""
@@ -39,35 +39,38 @@ ENC_FILE_PATH=""
 # Logging setup
 setup_logging() {
     mkdir -p "$(dirname "$LOG_FILE")"
-    exec > >(tee -a "$LOG_FILE")
-    exec 2> >(tee -a "$LOG_FILE" >&2)
     echo "=== Bootstrap started: $(date) ===" >> "$LOG_FILE"
+}
+
+# Function to strip ANSI color codes
+strip_ansi() {
+    sed 's/\x1b\[[0-9;]*m//g'
 }
 
 # Logging functions
 log() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | strip_ansi >> "$LOG_FILE"
 }
 
 error() {
     echo -e "${RED}ERROR: $1${NC}" >&2
-    log "ERROR: $1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - ERROR: $1" >> "$LOG_FILE"
     exit 1
 }
 
 success() {
     echo -e "${GREEN}[OK] $1${NC}"
-    log "SUCCESS: $1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - SUCCESS: $1" >> "$LOG_FILE"
 }
 
 info() {
     echo -e "${CYAN}INFO: $1${NC}"
-    log "INFO: $1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - INFO: $1" >> "$LOG_FILE"
 }
 
 warn() {
     echo -e "${YELLOW}WARNING: $1${NC}"
-    log "WARNING: $1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - WARNING: $1" >> "$LOG_FILE"
 }
 
 # Show banner
