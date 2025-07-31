@@ -143,7 +143,7 @@ disk:
     enabled: true
     passphrase: "test123"  # Simple passphrase for testing
   partitions:
-    efi_size: "256M"  # Reduced EFI size to save space
+    efi_size: "128M"  # Minimal EFI size to maximize root partition space
     # Note: No swap partition - using zram instead
   filesystem: "ext4"
 
