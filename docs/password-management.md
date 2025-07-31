@@ -106,6 +106,28 @@ Traditional secure password prompting:
 
 ### GitHub CI/CD Pipeline
 
+**🎨 Enhanced HTML Email Delivery:**
+
+Our GitHub Actions workflow now features beautiful HTML email delivery with encrypted password files:
+
+```yaml
+# GitHub Actions with HTML Email Delivery
+- name: Generate Encrypted Password File
+  uses: ./.github/workflows/generate-password-file.yml
+  with:
+    email_address: "user@example.com"
+    encryption_passphrase: "strong-passphrase"
+```
+
+**Features:**
+- **Professional HTML Formatting**: Gradient headers, styled tables, color-coded sections
+- **Secure Email Delivery**: Encrypted files sent directly to specified email
+- **Mobile Responsive**: Perfect display on all email clients  
+- **Complete Instructions**: Step-by-step deployment guide included in email
+- **Anti-Spam Protection**: Rate limiting and domain validation
+
+**Traditional Environment Variable Method:**
+
 ```yaml
 # GitHub Actions / GitLab CI
 - name: Deploy Arch Linux System
