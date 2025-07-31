@@ -315,7 +315,55 @@ install_missing_deps() {
         return 1
     fi
     
-    # Update package database first
+    # Critical: Free up space in live ISO environment before package installation
+    log_info "Checking and optimizing live system space before package installation..."
+    
+    # Show current space status
+    local available_space_kb=$(df / | tail -1 | awk '{print $4}')
+    local available_space_mb=$((available_space_kb / 1024))
+    log_info "Current root filesystem space: ${available_space_mb}MB available"
+    
+    # If space is critically low, perform aggressive cleanup
+    if [[ $available_space_mb -lt 1024 ]]; then  # Less than 1GB available
+        log_warn "Critical space shortage detected (${available_space_mb}MB). Performing emergency cleanup..."
+        
+        # Clean pacman cache aggressively
+        log_info "Cleaning pacman cache..."
+        sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
+        
+        # Clean temporary files
+        log_info "Cleaning temporary files..."
+        sudo rm -rf /tmp/* /var/tmp/* >/dev/null 2>&1 || true
+        
+        # Clean systemd journal logs
+        log_info "Cleaning system logs..."
+        sudo journalctl --vacuum-size=10M >/dev/null 2>&1 || true
+        
+        # Clean man pages and documentation (live system only)
+        log_info "Removing documentation to free space..."
+        sudo rm -rf /usr/share/man/* /usr/share/doc/* >/dev/null 2>&1 || true
+        
+        # Clean locale files except English
+        log_info "Cleaning unused locales..."
+        sudo find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en*' -exec rm -rf {} + >/dev/null 2>&1 || true
+        
+        # Recheck space after cleanup
+        available_space_kb=$(df / | tail -1 | awk '{print $4}')
+        available_space_mb=$((available_space_kb / 1024))
+        log_info "Space after cleanup: ${available_space_mb}MB available"
+        
+        if [[ $available_space_mb -lt 512 ]]; then  # Still less than 512MB
+            log_error "Insufficient space even after cleanup (${available_space_mb}MB)"
+            log_error "This indicates the live ISO environment is too small for this operation"
+            log_error "Consider:"
+            log_error "  1. Using a newer Arch ISO with more space"
+            log_error "  2. Running installation from a system with more disk space"
+            log_error "  3. Mounting additional storage for temporary use"
+            return 1
+        fi
+    fi
+    
+    # Update package database
     log_info "Updating package database..."
     if ! sudo pacman -Sy --noconfirm 2>/dev/null; then
         log_warn "Failed to update package database - proceeding with installation anyway"
@@ -331,6 +379,20 @@ install_missing_deps() {
     while [[ $attempt -le $max_retries ]]; do
         log_info "Installation attempt $attempt/$max_retries - Installing packages: ${unique_packages[*]}"
         
+        # Check space before each attempt and clean if needed
+        available_space_kb=$(df / | tail -1 | awk '{print $4}')
+        available_space_mb=$((available_space_kb / 1024))
+        
+        if [[ $available_space_mb -lt 700 ]]; then  # Less than 700MB for this attempt
+            log_warn "Low space before attempt $attempt (${available_space_mb}MB). Cleaning cache..."
+            sudo pacman -Sc --noconfirm >/dev/null 2>&1 || true
+            
+            # Recheck after cleaning
+            available_space_kb=$(df / | tail -1 | awk '{print $4}')
+            available_space_mb=$((available_space_kb / 1024))
+            log_info "Space after cache cleaning: ${available_space_mb}MB"
+        fi
+        
         # Capture both stdout and stderr for better error diagnosis
         local pacman_output
         pacman_output=$(sudo pacman -S --needed --noconfirm "${unique_packages[@]}" 2>&1)
@@ -345,7 +407,26 @@ install_missing_deps() {
             log_debug "Pacman output: $pacman_output"
             
             # Analyze common error patterns and provide specific guidance
-            if echo "$pacman_output" | grep -q "target not found"; then
+            if echo "$pacman_output" | grep -q "not enough free disk space\|too full"; then
+                log_error "Critical disk space error detected in live ISO environment"
+                log_info "The Arch Linux live ISO root filesystem is too small"
+                log_info "Emergency space recovery actions:"
+                
+                # Perform aggressive emergency cleanup
+                log_info "Performing emergency space cleanup..."
+                sudo pacman -Scc --noconfirm >/dev/null 2>&1 || true
+                sudo rm -rf /tmp/* /var/tmp/* /var/cache/* >/dev/null 2>&1 || true
+                sudo journalctl --vacuum-size=5M >/dev/null 2>&1 || true
+                sudo rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/gtk-doc/* >/dev/null 2>&1 || true
+                sudo rm -rf /usr/share/locale/[^e]* >/dev/null 2>&1 || true  # Keep only English
+                sudo find /usr/lib -name "*.a" -delete >/dev/null 2>&1 || true  # Remove static libraries
+                
+                # Check space after emergency cleanup
+                available_space_kb=$(df / | tail -1 | awk '{print $4}')
+                available_space_mb=$((available_space_kb / 1024))
+                log_info "Space after emergency cleanup: ${available_space_mb}MB"
+                
+            elif echo "$pacman_output" | grep -q "target not found"; then
                 log_error "Some packages were not found in repositories"
                 log_info "This might be due to:"
                 log_info "  - Outdated package database (try: sudo pacman -Sy)"
@@ -375,6 +456,23 @@ install_missing_deps() {
         echo "$pacman_output" | while IFS= read -r line; do
             log_error "  $line"
         done
+        
+        # Check if this is specifically an ansible installation failure due to space
+        if echo "${unique_packages[*]}" | grep -q "ansible" && echo "$pacman_output" | grep -q "not enough free disk space\|too full"; then
+            log_warn "Ansible installation failed due to live ISO space constraints"
+            log_info "Attempting fallback installation method..."
+            
+            # Export fallback flag for deploy.sh to use direct installation method
+            export ANSIBLE_INSTALL_FAILED=true
+            export FALLBACK_TO_DIRECT_INSTALL=true
+            
+            log_info "Fallback mode enabled:"
+            log_info "  - Skipping Ansible dependency"
+            log_info "  - Will use direct installation scripts instead"
+            log_info "  - This may reduce functionality but allows installation to proceed"
+            
+            return 0  # Continue with fallback method
+        fi
         
         # Provide manual installation instructions
         log_info ""
