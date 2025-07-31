@@ -539,6 +539,15 @@ format_filesystems() {
     info "Formatting root partition: $ENCRYPTED_ROOT"
     mkfs.ext4 -F -v "$ENCRYPTED_ROOT" || error "Failed to format root partition"
     
+    # Immediately expand the filesystem to use all available partition space
+    info "Expanding filesystem to use full partition space..."
+    if command -v resize2fs >/dev/null 2>&1; then
+        info "Expanding ext4 filesystem on: $ENCRYPTED_ROOT"
+        resize2fs "$ENCRYPTED_ROOT" 2>/dev/null || warn "Immediate filesystem expansion failed"
+    else
+        warn "resize2fs not available - filesystem may not use full partition space"
+    fi
+    
     # Verify formatting
     info "Verifying filesystem creation..."
     lsblk -f "$EFI_PARTITION" "$ENCRYPTED_ROOT" || warn "Could not verify filesystems"
@@ -833,19 +842,49 @@ install_base_system() {
     local available_space_gb=$((available_space_kb / 1024 / 1024))
     info "Available space in /mnt: ${available_space_gb}GB (${available_space_mb}MB)"
     
-    # Show detailed space breakdown
-    info "Disk space breakdown:"
-    df -h /mnt
+    # Show detailed space breakdown with encryption info
+    info "Comprehensive disk space analysis:"
+    info "  Encryption enabled: ${ENCRYPTION_ENABLED:-false}"
+    info "  Root partition: ${ROOT_PARTITION:-unknown}"
+    info "  Encrypted root: ${ENCRYPTED_ROOT:-unknown}"
+    
+    info "Partition layout:"
     lsblk
+    
+    info "Filesystem usage:"
+    df -h /mnt
+    
+    info "Encrypted devices (if any):"
+    ls -la /dev/mapper/ 2>/dev/null || info "No encrypted devices found"
     
     # Check if we need to expand the filesystem
     if [[ $available_space_mb -lt 2048 ]]; then  # Less than 2GB available
         warn "Low disk space detected (${available_space_mb}MB), attempting filesystem expansion..."
         
+        # Determine the correct device to expand (encrypted vs unencrypted)
+        local filesystem_device
+        if [[ "${ENCRYPTION_ENABLED:-}" == "true" ]] && [[ -n "${ENCRYPTED_ROOT:-}" ]]; then
+            filesystem_device="$ENCRYPTED_ROOT"
+            info "Using encrypted filesystem device: $filesystem_device"
+        else
+            filesystem_device="$ROOT_PARTITION"
+            info "Using unencrypted filesystem device: $filesystem_device"
+        fi
+        
         # Try to expand the filesystem to use all available partition space
         if command -v resize2fs >/dev/null 2>&1; then
-            info "Attempting to expand ext4 filesystem..."
-            resize2fs "$ROOT_PARTITION" 2>/dev/null || warn "Filesystem expansion failed"
+            info "Attempting to expand ext4 filesystem on: $filesystem_device"
+            
+            # Verify the device exists and is accessible
+            if [[ -b "$filesystem_device" ]]; then
+                info "Device $filesystem_device verified - proceeding with expansion"
+                resize2fs "$filesystem_device" 2>/dev/null || warn "Filesystem expansion failed"
+            else
+                warn "Cannot expand filesystem - device $filesystem_device not found or not accessible"
+                warn "Available devices:"
+                ls -la /dev/mapper/ 2>/dev/null || true
+                lsblk 2>/dev/null || true
+            fi
             
             # Recheck space after expansion
             available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
