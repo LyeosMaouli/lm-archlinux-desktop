@@ -14,6 +14,11 @@ This update enhances the GitHub Action workflow with beautiful HTML email format
 - **Solution**: Complete HTML email with professional styling
 - **Result**: Beautiful, responsive emails with colors and proper layout
 
+### 3. ✅ File Integrity Verification
+- **Enhancement**: Added SHA256 hash calculation and verification
+- **Security**: Users can verify file integrity after download
+- **Cross-Platform**: Includes hash verification commands for Linux, Windows, and macOS
+
 ## 🎨 HTML Email Features
 
 - **🎨 Professional Design**: Gradient header with Terragon Labs branding
@@ -25,6 +30,7 @@ This update enhances the GitHub Action workflow with beautiful HTML email format
 - **💻 Code Blocks**: Dark terminal-style code snippets for commands
 - **📱 Responsive Design**: Works well on desktop and mobile clients
 - **🎯 Clear Navigation**: Step-by-step instructions with proper numbering
+- **🛡️ File Integrity**: SHA256 hash included for file verification across platforms
 
 ## 📧 Email Structure
 
