@@ -128,7 +128,7 @@ Simplified development approach for maximum productivity:
 
 ### ⚙️ Unified Configuration System
 
-- **Single Source of Truth** - All configuration in `config/deployment.conf`
+- **Single Source of Truth** - All configuration in `config/deploy.conf`
 - **Auto-Generated Files** - Bootstrap, Ansible, and other configs generated automatically
 - **Validation System** - Built-in configuration validation and error checking
 - **Easy Maintenance** - Update once, deploy everywhere consistently
@@ -186,8 +186,8 @@ chmod +x bootstrap.sh
 nano bootstrap.conf
 
 # Key settings to customize:
-# - HOSTNAME=phoenix          # Your computer name
-# - USERNAME=lyeosmaouli      # Your username
+# - HOSTNAME=my-computer      # Your computer name
+# - USERNAME=myusername       # Your username
 # - PROFILE=work              # work/personal/development
 # - TIMEZONE=Europe/Paris     # Your timezone
 # - KEYMAP=fr                # Your keyboard layout

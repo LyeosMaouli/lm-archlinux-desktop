@@ -63,8 +63,8 @@ lm-archlinux-desktop/
 ├── 📄 LICENSE                       # Project license
 ├── 📄 local.yml                     # Main Ansible playbook (ansible-pull entry point)
 ├── 📄 Makefile                      # Build automation and shortcuts
-├── 📄 deployment_config.yml         # Main deployment configuration template
-├── 📄 example_deployment_config.yml # Example configuration file
+├── 📄 bootstrap.conf                # Bootstrap configuration file
+├── 📄 example_bootstrap.conf        # Example bootstrap configuration
 ├── 📄 requirements.txt              # Python/Ansible dependencies
 │
 ├── 📂 config/                       # 🔧 Configuration Files
@@ -152,11 +152,7 @@ lm-archlinux-desktop/
 │   ├── 📂 themes/                  # Desktop themes and styling
 │   └── 📂 wallpapers/              # Desktop wallpapers
 │
-├── 📂 templates/                    # 📝 Jinja2 Configuration Templates
-│   ├── 📂 configs/                 # System configuration templates
-│   ├── 📂 dbus/                    # D-Bus configuration templates
-│   ├── 📂 systemd/                 # Systemd service and timer templates
-│   └── 📂 udev/                    # Udev rules templates
+# (Templates are located within each Ansible role's templates/ directory)
 │
 ├── 📂 tools/                        # 🔧 System Management Tools
 │   ├── 📄 README.md                # Tools documentation
@@ -195,9 +191,9 @@ lm-archlinux-desktop/
 
 - **Region**: Auto-detected fastest package mirrors (configurable by country)
 - **Locale**: English (en_US.UTF-8) - configurable
-- **Keyboard**: French AZERTY layout (fr keymap) - configurable
-- **Timezone**: Europe/Paris - configurable
-- **Default System**: Hostname "phoenix", user "lyeosmaouli" - fully configurable
+- **Keyboard**: US QWERTY layout (us keymap) - configurable
+- **Timezone**: UTC - configurable
+- **Default System**: Generic hostnames and usernames - fully configurable
 
 ## 📦 **Critical Package Requirements**
 
@@ -426,11 +422,11 @@ make test
 
 ### Dynamic Configuration Management
 
-- **Systemd Templates**: `templates/systemd/` - Service and timer files
 - **Desktop Templates**: Role-specific templates for Hyprland, Waybar, Kitty, etc.
 - **Security Templates**: Firewall rules, fail2ban, and audit configurations
 - **System Templates**: Bootloader, locale, and system configuration files
 - **Role Templates**: Each Ansible role contains its own template directory
+- **Systemd Templates**: Power management and system service templates
 - **Jinja2 Templating**: Dynamic configuration generation with variables
 - **Hardware Detection**: Automatic configuration based on detected hardware
 
@@ -609,7 +605,7 @@ make test
 
 - **Main Entry Point**: `local.yml` - Ansible playbook for ansible-pull deployment
 - **Unified CLI**: `scripts/deploy.sh` - Single script for all deployment operations
-- **Configuration**: `deployment_config.yml` - Main configuration template
+- **Configuration**: `config/deploy.conf` - Main deployment configuration
 - **Role-Based**: Modular Ansible roles for each system component
 - **Template-Driven**: Jinja2 templates for dynamic configuration generation
 - **VM Testing**: `scripts/testing/auto_vm_test.sh` - Comprehensive automated testing
