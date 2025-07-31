@@ -45,7 +45,7 @@
 - **4 Secure Methods**: Environment variables, encrypted files, auto-generation, interactive
 - **Enterprise CI/CD Integration**: GitHub Actions workflow templates
 - **AES-256 Encryption**: PBKDF2 key derivation for password files
-- **Email & QR Delivery**: Multiple secure password delivery methods
+- **HTML Email Delivery**: Beautiful, professional email delivery with encrypted password files
 - **Zero-Touch Deployment**: Complete automation from ISO to desktop
 
 ### 📱 **USB Deployment System** _(No More Typing Errors!)_
