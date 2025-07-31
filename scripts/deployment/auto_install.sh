@@ -313,7 +313,7 @@ setup_partitions() {
     local efi_size=$(parse_nested_config "disk" "efi_size")
     
     if [[ -z "${efi_size:-}" ]]; then
-        efi_size="256M"  # Conservative EFI size to maximize root partition space
+        efi_size="128M"  # Minimal EFI size to maximize root partition space
     fi
     
     info "Setting up partitions on $disk_device..."
@@ -378,6 +378,22 @@ setup_partitions() {
     info "Partitions created successfully:"
     info "  EFI: $EFI_PARTITION"
     info "  Root: $ROOT_PARTITION"
+    
+    # Analyze partition sizes for optimization
+    info "Analyzing partition layout for space optimization..."
+    local disk_size_bytes=$(lsblk -b -n -d -o SIZE "$disk_device" 2>/dev/null || echo "0")
+    local disk_size_gb=$((disk_size_bytes / 1024 / 1024 / 1024))
+    local efi_size_mb=$(echo "$efi_size" | sed 's/M$//' | sed 's/G$/000/')
+    local expected_root_gb=$(( disk_size_gb - (efi_size_mb / 1024) ))
+    
+    info "Disk analysis:"
+    info "  Total disk: ${disk_size_gb}GB"
+    info "  EFI allocation: ${efi_size} (${efi_size_mb}MB)"
+    info "  Expected root: ~${expected_root_gb}GB"
+    
+    if [[ $disk_size_gb -lt 10 ]]; then
+        warn "Very small disk detected (${disk_size_gb}GB). Installation may be challenging."
+    fi
     
     # Verify partitions exist with retry logic
     info "Verifying partition creation..."
@@ -810,18 +826,45 @@ install_base_system() {
     info "Cleaning package cache to free up space..."
     pacman -Scc --noconfirm || warn "Failed to clean package cache"
     
-    # Check available disk space before installation
-    info "Checking available disk space..."
+    # Comprehensive disk space analysis and expansion
+    info "Performing comprehensive disk space analysis..."
     local available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
+    local available_space_mb=$((available_space_kb / 1024))
     local available_space_gb=$((available_space_kb / 1024 / 1024))
-    info "Available space in /mnt: ${available_space_gb}GB"
+    info "Available space in /mnt: ${available_space_gb}GB (${available_space_mb}MB)"
     
-    if [[ $available_space_gb -lt 5 ]]; then
-        error "Insufficient disk space for installation (${available_space_gb}GB < 5GB required)"
-        error "Available space breakdown:"
-        df -h /mnt
-        lsblk
+    # Show detailed space breakdown
+    info "Disk space breakdown:"
+    df -h /mnt
+    lsblk
+    
+    # Check if we need to expand the filesystem
+    if [[ $available_space_mb -lt 2048 ]]; then  # Less than 2GB available
+        warn "Low disk space detected (${available_space_mb}MB), attempting filesystem expansion..."
+        
+        # Try to expand the filesystem to use all available partition space
+        if command -v resize2fs >/dev/null 2>&1; then
+            info "Attempting to expand ext4 filesystem..."
+            resize2fs "$ROOT_PARTITION" 2>/dev/null || warn "Filesystem expansion failed"
+            
+            # Recheck space after expansion
+            available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
+            available_space_mb=$((available_space_kb / 1024))
+            available_space_gb=$((available_space_kb / 1024 / 1024))
+            info "Space after expansion: ${available_space_gb}GB (${available_space_mb}MB)"
+        fi
+    fi
+    
+    # Final space check with more granular requirements
+    if [[ $available_space_mb -lt 1024 ]]; then  # Less than 1GB
+        error "Insufficient disk space for installation (${available_space_mb}MB < 1024MB required)"
+        error "This typically indicates partition layout issues. Consider:"
+        error "1. Increasing VM disk size beyond 60GB"
+        error "2. Reducing EFI partition size further"
+        error "3. Checking for partition alignment issues"
         return 1
+    elif [[ $available_space_mb -lt 2048 ]]; then  # Less than 2GB
+        warn "Marginal disk space (${available_space_mb}MB). Installation may fail with large package sets."
     fi
     
     # Try pacstrap with better error handling and diagnostics
@@ -833,7 +876,16 @@ install_base_system() {
     echo "Mirror list being used:" >> "$VERBOSE_LOG"
     cat /etc/pacman.d/mirrorlist >> "$VERBOSE_LOG" 2>&1
     echo "=== PACSTRAP OUTPUT ===" >> "$VERBOSE_LOG"
-    if ! timeout 1800 pacstrap -c /mnt base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode 2>&1 | tee -a "$VERBOSE_LOG"; then
+    # Use minimal package set for tight disk space scenarios
+    if [[ $available_space_mb -lt 1536 ]]; then  # Less than 1.5GB
+        minimal_packages="base linux networkmanager"
+        warn "Using minimal package set due to low disk space: $minimal_packages"
+        pacstrap_cmd="timeout 1800 pacstrap -c /mnt $minimal_packages"
+    else
+        pacstrap_cmd="timeout 1800 pacstrap -c /mnt base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode"
+    fi
+    
+    if ! $pacstrap_cmd 2>&1 | tee -a "$VERBOSE_LOG"; then
         warn "Full package installation failed"
         
         # Show more diagnostic information
