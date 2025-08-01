@@ -7,14 +7,14 @@ profile_type: "WORK"
 
 # System Configuration
 system:
-  hostname: "phoenix"
-  timezone: "Europe/Paris"
+  hostname: "work-system"
+  timezone: "UTC"
   locale: "en_US.UTF-8"
-  keymap: "fr"
+  keymap: "us"
 
 # User Configuration  
 user:
-  username: "lyeosmaouli"
+  username: "workuser"
   shell: "/bin/bash"
   groups:
     - wheel
@@ -48,8 +48,8 @@ security:
 # Development Configuration
 development:
   git:
-    username: "Lyeos Maouli"
-    email: "lyeos@example.com"
+    username: "Work User"
+    email: "user@company.com"
   ssh_keys:
     generate: true
     type: "ed25519"

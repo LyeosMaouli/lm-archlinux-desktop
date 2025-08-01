@@ -6,13 +6,13 @@
 # System configuration
 system:
   locale: "en_US.UTF-8"
-  keymap: "fr"
-  timezone: "Europe/Paris"
-  hostname: "phoenix"
+  keymap: "us"
+  timezone: "UTC"
+  hostname: "arch-system"
   
 # User configuration
 users:
-  main_user: "lyeosmaouli"
+  main_user: "user"
   groups:
     - wheel
     - audio
@@ -118,7 +118,7 @@ power:
     
 # Mirrors
 mirrors:
-  country: "France"
+  country: ""
   
 # Bootloader
 bootloader:

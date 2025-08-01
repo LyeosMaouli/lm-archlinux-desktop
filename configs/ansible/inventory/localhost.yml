@@ -1,7 +1,7 @@
 ---
 all:
   hosts:
-    phoenix:
+    localhost:
       ansible_host: 127.0.0.1
       ansible_connection: local
       ansible_user: root
@@ -10,7 +10,7 @@ all:
   children:
     laptops:
       hosts:
-        phoenix:
+        localhost:
 
     desktops:
       hosts: {}
@@ -25,13 +25,13 @@ all:
 
     # System configuration
     locale: en_US.UTF-8
-    keymap: fr
-    timezone: Europe/Paris
-    hostname: phoenix
+    keymap: us
+    timezone: UTC
+    hostname: localhost
 
-    # UK package mirrors
-    country_code: GB
-    mirror_country: "United Kingdom"
+    # Package mirrors (auto-detected)
+    country_code: ""
+    mirror_country: ""
 
     # Desktop environment
     desktop_environment: hyprland

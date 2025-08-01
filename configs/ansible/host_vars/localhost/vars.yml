@@ -1,5 +1,5 @@
 ---
-# Host-specific variables for phoenix (work laptop)
+# Host-specific variables for localhost (example configuration)
 
 # Hardware specific configuration
 hardware:
@@ -10,7 +10,7 @@ hardware:
   
 # Network configuration
 network:
-  hostname: phoenix
+  hostname: localhost
   interfaces:
     - name: wlan0
       type: wireless

@@ -7,14 +7,14 @@ profile_type: "DEVELOPMENT"
 
 # System Configuration
 system:
-  hostname: "phoenix"
-  timezone: "Europe/Paris"
+  hostname: "dev-system"
+  timezone: "UTC"
   locale: "en_US.UTF-8"
-  keymap: "fr"
+  keymap: "us"
 
 # User Configuration  
 user:
-  username: "lyeosmaouli"
+  username: "developer"
   shell: "/bin/bash"
   groups:
     - wheel
@@ -48,8 +48,8 @@ security:
 # Development Configuration
 development:
   git:
-    username: "Lyeos Maouli"
-    email: "lyeos@example.com"
+    username: "Developer"
+    email: "dev@example.com"
   ssh_keys:
     generate: true
     type: "ed25519"
