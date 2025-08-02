@@ -1097,7 +1097,7 @@ generate_deployment_config() {
     elif [[ "${PASSWORD_MODE:-}" == "env" ]]; then
         root_password="${DEPLOY_ROOT_PASSWORD:-}"
         user_password="${DEPLOY_USER_PASSWORD:-}"
-        encryption_passphrase="${DEPLOY_ENCRYPTION_PASSPHRASE:-}"
+        encryption_passphrase="${DEPLOY_LUKS_PASSPHRASE:-}"
     elif [[ "${PASSWORD_MODE:-}" == "generate" ]]; then
         # Generate secure passwords
         source "$SCRIPT_DIR/utils/passwords.sh" || {
