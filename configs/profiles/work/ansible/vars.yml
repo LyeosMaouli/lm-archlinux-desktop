@@ -1,6 +1,6 @@
 ---
 # work Profile Configuration
-# Generated from config/deploy.conf - DO NOT EDIT MANUALLY
+# Generated from deploy-config/deploy.conf - DO NOT EDIT MANUALLY
 
 profile_name: "work"
 profile_type: "WORK"

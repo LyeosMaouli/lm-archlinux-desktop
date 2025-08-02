@@ -29,7 +29,7 @@ Transforms minimal Arch Linux into fully-configured Hyprland desktop:
 
 ```bash
 # Edit main configuration
-nano config/deploy.conf
+nano deploy-config/deploy.conf
 
 # Key settings:
 USER_NAME="yourusername"
@@ -123,7 +123,7 @@ See [Password Management](password-management.md) for details.
 
 ```bash
 # Customize configuration
-cp config/deploy.conf my_deploy.conf
+cp deploy-config/deploy.conf my_deploy.conf
 nano my_deploy.conf
 
 # Deploy with custom config

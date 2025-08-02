@@ -2,14 +2,14 @@
 
 ## Overview
 
-The Arch Linux Hyprland Desktop Automation system features a revolutionary hybrid password management system that enables fully automated deployments while maintaining enterprise-grade security. The system now uses **centralized configuration** through `config/deploy.conf` and supports multiple password input methods with intelligent fallback mechanisms and **automatic dependency installation**.
+The Arch Linux Hyprland Desktop Automation system features a revolutionary hybrid password management system that enables fully automated deployments while maintaining enterprise-grade security. The system now uses **centralized configuration** through `deploy-config/deploy.conf` and supports multiple password input methods with intelligent fallback mechanisms and **automatic dependency installation**.
 
 ## 🔧 Centralized Configuration
 
-All password settings can be configured in the main `config/deploy.conf` file:
+All password settings can be configured in the main `deploy-config/deploy.conf` file:
 
 ```bash
-# Password configuration in config/deploy.conf
+# Password configuration in deploy-config/deploy.conf
 PASSWORD_MODE="generate"                    # Default password method
 PASSWORD_FILE="../passwords.enc"           # Path to encrypted password file
 

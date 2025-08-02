@@ -182,7 +182,7 @@ If you discover a security vulnerability:
 
 ```bash
 # Security-focused development commands
-./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run  # Validate configuration security
+./scripts/utils/config_generator.sh --config deploy-config/deploy.conf --dry-run  # Validate configuration security
 ./scripts/deploy.sh full --dry-run                                        # Test deployment security
 ansible-lint configs/ansible/                                             # Validate Ansible security
 shellcheck scripts/**/*.sh                                                # Check script security

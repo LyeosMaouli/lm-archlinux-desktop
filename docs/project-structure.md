@@ -41,7 +41,7 @@ lm-archlinux-desktop/
 │
 ├── 📄 bootstrap.conf                # Bootstrap deployment configuration
 │
-├── 📂 config/                       # 🎯 Centralized Configuration
+├── 📂 deploy-config/                # 🎯 Centralized Configuration
 │   ├── 📄 deploy.conf               # Main deployment configuration (ALL SETTINGS)
 │   └── 📄 example.deploy.conf       # Example configuration with mock data
 │
@@ -154,7 +154,7 @@ lm-archlinux-desktop/
 │   ├── 📂 security/                 # 🔒 Security Scripts (legacy)
 │   └── 📂 utilities/                # 🛠️ Utility Scripts (legacy)
 │
-├── 📂 config/                       # ⚙️ Dynamic Configuration System
+├── 📂 deploy-config/                # ⚙️ Dynamic Configuration System
 │   └── 📄 deploy.conf               # Single source of truth (100+ options)
 │                                    #     - User configuration with recommendations
 │                                    #     - System, network, security settings

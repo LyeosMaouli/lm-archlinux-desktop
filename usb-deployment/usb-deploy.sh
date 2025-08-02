@@ -29,7 +29,7 @@ WIFI_SSID=""              # WiFi network name (empty = skip/prompt if needed)
 WIFI_PASSWORD=""          # WiFi password (empty = prompt if SSID set)
 
 # NOTE: System configuration (hostname, username, encryption, etc.) is now
-# centralized in config/deploy.conf. Edit that file instead of this script.
+# centralized in deploy-config/deploy.conf. Edit that file instead of this script.
 
 # =====================================
 # SCRIPT STARTS HERE - DO NOT EDIT
@@ -310,7 +310,7 @@ setup_environment() {
     export DEPLOY_GITHUB_BRANCH="$GITHUB_BRANCH"
     
     # Note: System configuration (hostname, username, encryption, etc.) is now
-    # managed through the centralized config/deploy.conf file that gets loaded automatically
+    # managed through the centralized deploy-config/deploy.conf file that gets loaded automatically
     
     # Set WiFi configuration if provided
     [[ -n "${WIFI_SSID:-}" ]] && export DEPLOY_WIFI_SSID="$WIFI_SSID"

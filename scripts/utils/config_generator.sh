@@ -9,7 +9,7 @@
 #   ./config_generator.sh [--config CONFIG_FILE] [--profile PROFILE] [--dry-run] [--verbose]
 #
 # Options:
-#   --config FILE    Configuration file to use (default: config/deploy.conf)
+#   --config FILE    Configuration file to use (default: deploy-config/deploy.conf)
 #   --profile NAME   Profile to use (work/personal/development)
 #   --dry-run       Show what would be generated without creating files
 #   --verbose       Enable verbose output
@@ -23,7 +23,7 @@ SCRIPT_NAME="Dynamic Ansible Configuration Generator"
 SCRIPT_VERSION="1.0.0"
 
 # Default configuration
-DEFAULT_CONFIG_FILE="config/deploy.conf"
+DEFAULT_CONFIG_FILE="deploy-config/deploy.conf"
 TEMPLATES_DIR="configs/ansible/templates"
 OUTPUT_DIR="configs/ansible"
 
