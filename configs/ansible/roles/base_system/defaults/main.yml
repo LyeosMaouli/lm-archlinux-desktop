@@ -3,8 +3,8 @@
 
 # System locale and keyboard
 base_locale: "{{ system.locale | default('en_US.UTF-8') }}"
-base_keymap: "{{ system.keymap | default('fr') }}"
-base_timezone: "{{ system.timezone | default('Europe/Paris') }}"
+base_keymap: "{{ system.keymap | default('us') }}"
+base_timezone: "{{ system.timezone | default('UTC') }}"
 base_hostname: "{{ system.hostname | default('phoenix') }}"
 
 # Package mirrors

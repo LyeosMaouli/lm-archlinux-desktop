@@ -10,7 +10,7 @@
   
   vars_prompt:
     - name: user_password
-      prompt: "Enter password for user 'lyeosmaouli'"
+      prompt: "Enter password for user '{{ main_user | default('user') }}'"
       private: yes
       confirm: yes
       
@@ -47,7 +47,7 @@
     - role: users_security
       tags: users, security
       vars:
-        main_user: lyeosmaouli
+        main_user: "{{ ansible_user | default('user') }}"
         user_password_hash: "{{ user_password | password_hash('sha512') }}"
         root_password_hash: "{{ root_password | password_hash('sha512') }}"
         
@@ -74,7 +74,7 @@
           
           Next steps:
           1. Reboot your system
-          2. Log in as 'lyeosmaouli'
+          2. Log in as '{{ main_user | default('user') }}'
           3. Start Hyprland desktop environment
           
           For troubleshooting, check logs in /var/log/ansible/
