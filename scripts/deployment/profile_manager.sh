@@ -416,6 +416,7 @@ main() {
             ;;
         *)
             error "Unknown command: $command. Use --help for usage information."
+            exit 1
             ;;
     esac
 }

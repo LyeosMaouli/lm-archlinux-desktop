@@ -121,6 +121,7 @@ parse_arguments() {
                 ;;
             *)
                 error "Unknown option: $1. Use --help for usage information."
+                exit 1
                 ;;
         esac
     done
