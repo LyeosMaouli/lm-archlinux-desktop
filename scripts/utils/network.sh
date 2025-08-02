@@ -24,8 +24,27 @@
 if [[ -z "${SCRIPT_DIR:-}" ]]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
-# shellcheck source=../internal/common.sh
-source "$SCRIPT_DIR/../internal/common.sh"
+
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is utils/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
+    exit 1
+fi
 
 # Network configuration
 readonly NETWORK_TEST_HOSTS=("8.8.8.8" "1.1.1.1" "208.67.222.222")
