@@ -5,14 +5,14 @@
 
 # System configuration
 system:
-  locale: "en_US.UTF-8"
-  keymap: "fr"
-  timezone: "Europe/Paris"
-  hostname: "hostname_placeholder"
+  locale: "${LOCALE:-en_US.UTF-8}"
+  keymap: "${KEYMAP:-us}"
+  timezone: "${TIMEZONE:-UTC}"
+  hostname: "${HOSTNAME:-localhost}"
   
 # User configuration
 users:
-  main_user: "username_placeholder"
+  main_user: "${USER_NAME:-user}"
   groups:
     - wheel
     - audio
@@ -53,9 +53,9 @@ packages:
     
 # Desktop environment
 desktop:
-  environment: hyprland
-  display_manager: sddm
-  theme: "catppuccin-mocha"
+  environment: ${DESKTOP_SESSION:-hyprland}
+  display_manager: ${DISPLAY_MANAGER:-sddm}
+  theme: "${DESKTOP_THEME:-catppuccin-mocha}"
   
   hyprland_packages:
     - hyprland
@@ -94,17 +94,17 @@ desktop:
 # Security configuration
 security:
   firewall:
-    enabled: true
+    enabled: ${ENABLE_FIREWALL:-true}
     default_policy: deny
     
   fail2ban:
-    enabled: true
+    enabled: ${ENABLE_FAIL2BAN:-true}
     
   audit:
-    enabled: true
+    enabled: ${ENABLE_AUDIT:-true}
     
   ssh:
-    port: 6741
+    port: ${SSH_PORT:-22}
     permit_root_login: "no"
     password_authentication: "no"
     pubkey_authentication: "yes"
@@ -112,18 +112,18 @@ security:
 # Power management
 power:
   tlp:
-    enabled: true
+    enabled: ${ENABLE_TLP:-true}
     
   thermald:
-    enabled: true
+    enabled: ${ENABLE_THERMALD:-true}
     
 # Mirrors
 mirrors:
-  country: ""
+  country: "${MIRROR_COUNTRY:-}"
   
 # Bootloader
 bootloader:
-  type: systemd-boot
+  type: ${BOOTLOADER:-systemd-boot}
   timeout: 5
   
 # Logging
@@ -134,7 +134,7 @@ logging:
 
 # Profile-specific configurations
 profile:
-  name: "work"
-  enable_development: true
-  enable_gaming: false
-  custom_packages: ""
+  name: "${PROFILE:-personal}"
+  enable_development: ${ENABLE_DEVELOPMENT:-false}
+  enable_gaming: ${ENABLE_GAMING:-false}
+  custom_packages: "${CUSTOM_PACKAGES:-}"

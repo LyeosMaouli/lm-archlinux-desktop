@@ -643,6 +643,53 @@ load_configuration() {
     fi
 }
 
+# Generate dynamic Ansible configuration files from deploy.conf
+generate_ansible_configs() {
+    log_info "Generating dynamic Ansible configuration files..."
+    
+    # Path to config generator script
+    local config_generator="$SCRIPT_DIR/utils/config_generator.sh"
+    
+    # Check if config generator exists
+    if [[ ! -f "$config_generator" ]]; then
+        log_error "Config generator script not found: $config_generator"
+        return $EXIT_CONFIG_ERROR
+    fi
+    
+    # Prepare config generator arguments
+    local generator_args=()
+    
+    # Add config file if specified
+    if [[ -n "${CONFIG_FILE:-}" ]]; then
+        generator_args+=("--config" "$CONFIG_FILE")
+    fi
+    
+    # Add profile if specified
+    if [[ -n "${PROFILE:-}" ]]; then
+        generator_args+=("--profile" "$PROFILE")
+    fi
+    
+    # Add verbose flag if debug logging is enabled
+    if [[ $LOG_LEVEL -ge $LOG_DEBUG ]]; then
+        generator_args+=("--verbose")
+    fi
+    
+    # Add dry-run flag if dry-run mode is enabled
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        generator_args+=("--dry-run")
+    fi
+    
+    log_debug "Calling config generator with args: ${generator_args[*]}"
+    
+    # Execute config generator
+    if ! "$config_generator" "${generator_args[@]}"; then
+        log_error "Failed to generate Ansible configuration files"
+        return $EXIT_CONFIG_ERROR
+    fi
+    
+    log_success "Ansible configuration files generated successfully"
+}
+
 # Auto-detect .enc files and update configuration
 auto_detect_enc_files() {
     log_info "Checking for .enc password files in project root..."
@@ -1157,6 +1204,9 @@ main() {
     # Parse arguments and load configuration
     parse_arguments "$@"
     load_configuration
+    
+    # Generate dynamic Ansible configuration files
+    generate_ansible_configs
     
     # Auto-detect .enc files and update configuration if needed
     auto_detect_enc_files
