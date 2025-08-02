@@ -1,20 +1,23 @@
-# Configuration System Guide
+# Dynamic Configuration System Guide
 
-The Arch Linux Desktop Automation project uses a **clean two-file configuration system** that eliminates redundancy while maintaining clear separation of concerns.
+The Arch Linux Desktop Automation project uses a **revolutionary dynamic configuration system** that generates Ansible configurations automatically from a single source of truth.
 
 ## Overview
 
-The configuration system is designed around the deployment workflow:
+The configuration system is designed around a **template-based approach**:
 
-1. **Bootstrap Phase**: Download repository and basic setup
-2. **Deployment Phase**: Detailed system configuration after repository is available
+1. **Bootstrap Phase**: Download repository and basic setup using `bootstrap.conf`
+2. **Configuration Generation**: Dynamic Ansible config generation from `deploy.conf`
+3. **Deployment Phase**: Automated deployment using generated configurations
 
-This results in **two configuration files with no redundancy**:
+This results in **dynamic configuration generation with no redundancy**:
 
 | File | Phase | Purpose | Contains |
 |------|-------|---------|----------|
 | `bootstrap.conf` | Pre-download | Repository access & basic identity | Repo URL, hostname, username, profile, network |
-| `config/deploy.conf` | Post-download | Detailed deployment settings | Security, packages, desktop, hardware config |
+| `config/deploy.conf` | Config Generation | Single source of truth | All deployment settings and template variables |
+| `configs/ansible/templates/` | Generation | Template engine | Jinja2 templates for dynamic config generation |
+| `configs/ansible/` | Deployment | Generated configs | Dynamically generated Ansible configurations |
 
 ## Configuration Files
 
@@ -48,7 +51,7 @@ VM_OPTIMIZATION=true
 
 ### 2. Deployment Configuration (`config/deploy.conf`)
 
-**Purpose**: Detailed deployment settings used AFTER repository download
+**Purpose**: Single source of truth for all deployment settings and template variables
 
 ```bash
 # User Configuration
@@ -94,42 +97,67 @@ SKIP_CONFIRMATIONS=false
 DEBUG=false
 ```
 
-**Used by**: `deploy.sh` script and Ansible playbooks after repository download
+**Used by**: `scripts/utils/config_generator.sh` to generate dynamic Ansible configurations
 
-## Configuration Manager
+### 3. Dynamic Configuration Templates (`configs/ansible/templates/`)
 
-The `scripts/utils/config_manager.sh` script manages the configuration system:
+**Purpose**: Jinja2 templates for generating Ansible configurations from deploy.conf
+
+```yaml
+# Example from group_vars.yml.j2
+ansible_user: ${USER_NAME}
+ansible_hostname: ${HOSTNAME}
+enable_encryption: ${ENCRYPTION_ENABLED}
+desktop_session: ${DESKTOP_SESSION}
+timezone: ${TIMEZONE}
+keymap: ${KEYMAP}
+locale: ${LOCALE}
+```
+
+**Used by**: `scripts/utils/config_generator.sh` for dynamic configuration generation
+
+### 4. Generated Configurations (`configs/ansible/`)
+
+**Purpose**: Dynamically generated Ansible configurations ready for deployment
+
+- `inventory/localhost.yml` - Generated host inventory
+- `group_vars/all/vars.yml` - Generated global variables  
+- `host_vars/{hostname}/vars.yml` - Generated host-specific variables
+
+**Used by**: Ansible playbooks during deployment
+
+## Dynamic Configuration Generator
+
+The `scripts/utils/config_generator.sh` script manages the dynamic configuration system:
 
 ### Commands
 
 ```bash
-# Validation
-./scripts/utils/config_manager.sh validate-all         # Validate both configs
-./scripts/utils/config_manager.sh validate-bootstrap  # Bootstrap only
-./scripts/utils/config_manager.sh validate-deploy     # Deployment only
+# Generate Ansible configurations from deploy.conf
+./scripts/utils/config_generator.sh --config config/deploy.conf
 
-# Synchronization
-./scripts/utils/config_manager.sh sync-settings       # Sync common values
-./scripts/utils/config_manager.sh check-consistency   # Check for redundancy
+# Test configuration generation (dry-run)
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
 
-# Profile Management
-./scripts/utils/config_manager.sh generate-profiles   # Generate profile configs
-./scripts/utils/config_manager.sh clean-generated     # Remove generated files
+# Generate with verbose output
+./scripts/utils/config_generator.sh --config config/deploy.conf --verbose
+
+# Generate for specific profile
+./scripts/utils/config_generator.sh --config config/deploy.conf --profile work
+
+# Clean generated files
+./scripts/utils/config_generator.sh --clean
 ```
 
-### Makefile Integration
+### Integration with Deploy Script
+
+The configuration generator is automatically called by `deploy.sh`:
 
 ```bash
-# Validation
-make config-validate                  # Validate both configurations
-make config-validate-bootstrap        # Validate bootstrap only
-make config-validate-deploy          # Validate deployment only
-
-# Management
-make config-sync                     # Sync common settings
-make config-check                    # Check consistency
-make config-generate-profiles        # Generate profile-specific configs
-make config-clean                    # Clean generated files
+# deploy.sh automatically calls config_generator.sh before Ansible
+./scripts/deploy.sh full                    # Auto-generates configs
+./scripts/deploy.sh full --dry-run          # Test generation + preview deployment
+./scripts/deploy.sh full --verbose          # Generate with verbose output
 ```
 
 ## Information Flow
@@ -142,33 +170,35 @@ make config-clean                    # Clean generated files
 4. Repository available: Contains config/deploy.conf with detailed settings
 ```
 
-### Deployment Workflow
+### Dynamic Configuration Workflow
 ```
 1. Deploy script: Loads config/deploy.conf from downloaded repository
-2. Configuration: All detailed deployment settings applied
-3. Profile system: Can override specific settings based on PROFILE
-4. Ansible: Uses generated profile-specific configurations
+2. Config generator: Parses deploy.conf and generates Ansible configurations
+3. Template processing: Substitutes variables into Jinja2 templates
+4. File generation: Creates inventory, group_vars, and host_vars files
+5. Ansible deployment: Uses generated configurations for deployment
 ```
 
 ## Configuration Validation
 
-The system includes comprehensive validation:
+The dynamic configuration system includes comprehensive validation:
 
 ### Bootstrap Validation
 - **Required fields**: REPO_URL, BRANCH, HOSTNAME, USERNAME, PROFILE
 - **Format validation**: URL format, hostname format, username format
 - **Value validation**: Profile must be work|personal|development
 
-### Deployment Validation
+### Deploy Configuration Validation
 - **Required fields**: USER_NAME, PASSWORD_MODE, DESKTOP_SESSION, etc.
 - **Boolean validation**: All boolean values must be true|false
 - **Enum validation**: PASSWORD_MODE, DESKTOP_SESSION, etc.
 - **Numeric validation**: LOG_LEVEL, timeouts, etc.
 
-### Consistency Checking
-- **Redundancy detection**: Warns about duplicate parameters
-- **Synchronization**: Keeps common values consistent between files
-- **Profile validation**: Ensures profile-specific settings are valid
+### Template Generation Validation
+- **Variable substitution**: Ensures all template variables are defined
+- **Template syntax**: Validates Jinja2 template syntax
+- **Output validation**: Validates generated YAML/INI files
+- **Profile consistency**: Ensures profile-specific overrides are valid
 
 ## Usage Examples
 
@@ -177,23 +207,26 @@ The system includes comprehensive validation:
 # 1. Edit bootstrap configuration
 nano bootstrap.conf
 
-# 2. Edit deployment configuration
+# 2. Edit deployment configuration (after repository download)
 nano config/deploy.conf
 
-# 3. Validate configuration
-make config-validate
+# 3. Test configuration generation
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
 
-# 4. Deploy system
+# 4. Deploy system (auto-generates configs)
 ./bootstrap.sh full
 ```
 
 ### Advanced Configuration Management
 ```bash
-# Check for configuration issues
-make config-check
+# Manual configuration generation
+./scripts/utils/config_generator.sh --config config/deploy.conf --verbose
 
-# Sync common settings (if needed)
-make config-sync
+# Test deployment with generated configs
+./scripts/deploy.sh full --dry-run
+
+# Clean generated configurations
+./scripts/utils/config_generator.sh --clean
 
 # Generate profile-specific configurations
 make config-generate-profiles

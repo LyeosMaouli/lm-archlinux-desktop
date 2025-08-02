@@ -24,6 +24,9 @@
 
 ### Latest Revolutionary Improvements
 
+- ✅ **Dynamic Configuration**: Ansible configs generated automatically from deploy.conf
+- ✅ **Template System**: Jinja2 templates for flexible configuration management
+- ✅ **Clean Architecture**: Removed redundancies and standardized all configurations
 - ✅ **Auto-Dependency Installation**: Missing packages (ansible, cryptsetup, parted) installed automatically
 - ✅ **Centralized Configuration**: Single `config/deploy.conf` file replaces scattered settings
 - ✅ **Intelligent Path Resolution**: Works seamlessly from USB, local, or CI/CD environments

@@ -6,10 +6,12 @@ Welcome to the **Next-Generation Arch Linux Hyprland Desktop Automation** docume
 
 This documentation now covers the **latest enhancements** including:
 
-- **🐳 Container Development Environment** - DevContainers and Docker Compose support
+- **🔧 Dynamic Configuration System** - Ansible configs generated automatically from deploy.conf
+- **🧹 Clean Architecture** - Removed redundancies and standardized all configurations
+- **📋 Template-Based Generation** - Jinja2 templates for flexible configuration management
 - **⚡ Performance Optimizations** - 3x faster deployments with parallel processing
 - **📊 Structured Logging** - JSON-based logging with correlation tracking
-- **🔒 Enhanced Security** - Container isolation and advanced audit logging
+- **🔒 Enhanced Security** - Advanced security hardening and audit logging
 - **📈 Performance Monitoring** - Built-in deployment analytics and optimization
 
 ## 🚀 Getting Started
@@ -17,19 +19,20 @@ This documentation now covers the **latest enhancements** including:
 ### Quick Start Guides
 
 - **[Installation Guide](installation-guide.md)** - Complete deployment instructions with full automation
-- **[Development Instructions](development-instructions.md)** - 🆕 Container-based development setup
+- **[Development Instructions](development-instructions.md)** - Direct development workflow setup
 - **[VirtualBox Testing](virtualbox-testing-guide.md)** - Safe testing environment setup
 
 ### Configuration
 
-- **[Example Configuration](../example_config.yml)** - User-friendly configuration template
-- **[Deployment Configuration](../deployment_config.yml)** - Complete configuration reference
+- **[Dynamic Configuration Guide](configuration-system-guide.md)** - Template-based configuration system
+- **[Deploy Configuration](../config/deploy.conf)** - Main deployment configuration file
+- **[Password Management](password-management.md)** - Advanced password system
 
 ## 📚 Project Documentation
 
 ### Development
 
-- **[Development Instructions](development-instructions.md)** - 🆕 Container-based development workflows
+- **[Development Instructions](development-instructions.md)** - Direct development workflows
 - **[Project Structure](project-structure.md)** - Complete codebase documentation
 - **[Enhancement Opportunities](improvements/enhancement-opportunities.md)** - 🆕 System improvement analysis
 - **[Improvement Plan](improvements/improvement-plan.md)** - 🆕 Strategic enhancement roadmap
@@ -41,17 +44,17 @@ This documentation now covers the **latest enhancements** including:
 
 ## 🛠️ Technical Documentation
 
-### 🆕 Development Environment
+### 🆕 Dynamic Configuration System
 
-- **DevContainers**: Located in `.devcontainer/`
-  - Full VSCode integration with automated setup
-  - Pre-configured development tools and extensions
-  - Secure container isolation for development
-- **Docker Compose**: Multi-service development stack
-  - Development container with all tools
-  - Documentation server with live reload
-  - Redis for caching and development data
-  - Optional PostgreSQL for database development
+- **Template Engine**: Located in `configs/ansible/templates/`
+  - Dynamic Ansible configuration generation from deploy.conf
+  - Jinja2 templates for flexible configuration management
+  - Profile-specific configurations (work, personal, development)
+  - Automatic variable substitution and validation
+- **Configuration Generator**: `scripts/utils/config_generator.sh`
+  - Parses deploy.conf and generates Ansible configurations
+  - Supports dry-run mode for safe testing
+  - Comprehensive error handling and validation
 
 ### Architecture
 
@@ -65,12 +68,13 @@ This documentation now covers the **latest enhancements** including:
 
 ### Scripts
 
-- **Deployment Scripts**: Located in `scripts/deployment/`
+- **Deployment Scripts**: Located in `scripts/`
 
-  - `deploy.sh` - Unified deployment interface (full, install, desktop, security)
-  - `auto_install.sh` - Automated base system installation
-  - `profile_manager.sh` - Profile management utility
-  - `auto_post_install.sh` - Post-installation validation
+  - `deploy.sh` - Unified deployment interface with dynamic config generation
+  - `deployment/auto_install.sh` - Automated base system installation
+  - `deployment/profile_manager.sh` - Profile management utility
+  - `deployment/auto_post_install.sh` - Post-installation validation
+  - `utils/config_generator.sh` - Dynamic Ansible configuration generator
 
 - **Testing Scripts**: Located in `scripts/testing/`
 
@@ -81,32 +85,40 @@ This documentation now covers the **latest enhancements** including:
 
 ### Configuration Files
 
-- **Ansible Configuration**: `configs/ansible/ansible.cfg`
-- **Inventory**: `configs/ansible/inventory/localhost.yml`
-- **Variables**: `configs/ansible/group_vars/all/vars.yml`
+- **Main Configuration**: `config/deploy.conf` - Single source of truth for all settings
+- **Bootstrap Configuration**: `bootstrap.conf` - Bootstrap deployment settings
+- **Dynamic Templates**: `configs/ansible/templates/` - Jinja2 templates for config generation
+- **Generated Files**: `configs/ansible/` - Dynamically generated Ansible configurations
 
 ## 🎯 Common Tasks
 
-### 🆕 Container Development
+### 🆕 Dynamic Configuration Development
 
 ```bash
-# VSCode DevContainers (Recommended for developers)
-# 1. Install VSCode and Dev Containers extension
-# 2. Clone and open in VSCode
+# Clone repository for development
 git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
-code lm-archlinux-desktop
-# 3. Reopen in Container (Ctrl+Shift+P -> "Dev Containers: Reopen in Container")
+cd lm-archlinux-desktop
 
-# Docker Compose development
-docker compose up -d dev docs   # Start development environment
-docker compose exec dev bash    # Access development container
-dev-deploy --dry-run full      # Test deployment with monitoring
+# Test dynamic configuration generation
+./scripts/deploy.sh full --dry-run --verbose
+
+# Generate configs manually for testing
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
+
+# Validate generated configurations
+ansible-lint configs/ansible/
 ```
 
 ### Installation
 
 ```bash
-# Fully automated installation
+# Bootstrap deployment (recommended)
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
+wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
+chmod +x bootstrap.sh
+./bootstrap.sh full
+
+# Development deployment
 git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
 ./scripts/deploy.sh full
 ```
@@ -114,14 +126,14 @@ git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archl
 ### Testing
 
 ```bash
-# Container testing (recommended)
-docker compose --profile testing up test
-docker compose exec test ./scripts/testing/test_installation.sh
+# Bootstrap testing (recommended)
+./bootstrap.sh testing --verbose
 
 # VirtualBox testing
-curl -fsSL https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/scripts/testing/auto_vm_test.sh -o vm_test.sh
-chmod +x vm_test.sh
-./vm_test.sh
+./scripts/testing/auto_vm_test.sh
+
+# Installation validation
+./scripts/testing/test_installation.sh
 ```
 
 ### Maintenance
@@ -136,11 +148,10 @@ system-update
 # Security audit with structured logging
 sudo /usr/local/bin/audit-analysis
 
-# 🆕 Development environment maintenance
-dev-monitor               # Monitor deployment performance
-dev-lint                 # Run code quality checks
-dev-security-scan        # Security scan development environment
-docker compose down -v   # Clean development volumes
+# 🆕 Configuration management
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run  # Test config generation
+ansible-lint configs/ansible/    # Validate generated configurations
+./scripts/deploy.sh full --dry-run  # Preview deployment actions
 ```
 
 ## 🆘 Troubleshooting

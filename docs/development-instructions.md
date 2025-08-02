@@ -1,11 +1,13 @@
 # Direct Development Guide for Arch Linux Desktop Automation
 
-This guide provides instructions for direct development on the Arch Linux Desktop Automation project, using a simplified workflow without containers.
+This guide provides instructions for direct development on the Arch Linux Desktop Automation project, featuring a **dynamic configuration system** and **clean architecture**.
 
 ## 🎯 **Development Philosophy**
 
-This project now uses a **direct development approach** that emphasizes simplicity, performance, and ease of use:
+This project uses a **direct development approach** with modern automation features:
 
+- **Dynamic Configuration**: Template-based Ansible config generation from deploy.conf
+- **Clean Architecture**: Removed redundancies and standardized all configurations
 - **Direct Host Development**: Work directly on your development machine
 - **VirtualBox Testing**: Use VirtualBox VMs for comprehensive testing
 - **Simplified Workflow**: Minimal overhead, maximum productivity
@@ -78,16 +80,19 @@ git pull origin develop
 # 2. Make changes to code
 # Edit Ansible roles, scripts, documentation, etc.
 
-# 3. Validate changes
+# 3. Test dynamic configuration generation
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
+
+# 4. Validate changes
 ansible-lint configs/ansible/
 shellcheck scripts/**/*.sh
 
-# 4. Test deployment configuration
+# 5. Test deployment configuration
 ./scripts/deploy.sh full --dry-run
 
-# 5. Test in VirtualBox (see Testing section)
+# 6. Test in VirtualBox (see Testing section)
 
-# 6. Commit changes
+# 7. Commit changes
 git add .
 git commit -m "feat: your change description"
 git push origin develop
@@ -98,10 +103,13 @@ git push origin develop
 #### Core Development Commands
 
 ```bash
+# Test dynamic configuration generation
+./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run --verbose
+
 # Test deployment without execution
 ./scripts/deploy.sh full --dry-run --verbose
 
-# Validate Ansible configurations
+# Validate Ansible configurations (after generation)
 ansible-lint configs/ansible/
 
 # Test specific Ansible roles

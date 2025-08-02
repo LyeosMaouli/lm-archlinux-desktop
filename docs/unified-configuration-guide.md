@@ -1,25 +1,25 @@
-# Unified Configuration System
+# Dynamic Configuration System
 
-The Arch Linux Desktop Automation project now uses a **unified configuration system** that eliminates redundant configuration parameters across multiple files. This system provides a single source of truth for all deployment settings.
+The Arch Linux Desktop Automation project now uses a **revolutionary dynamic configuration system** that generates Ansible configurations automatically from a single source of truth using template-based generation.
 
 ## Overview
 
-Previously, configuration parameters were duplicated across multiple files:
-- `bootstrap.conf`
-- `config/deploy.conf`
-- `example_deployment_config.yml`
-- `configs/ansible/group_vars/all/vars.yml`
-- `configs/profiles/*/ansible/vars.yml`
-- `configs/profiles/*/archinstall/user_configuration.json`
+The new dynamic system features:
+- **Single Source of Truth**: `config/deploy.conf` - All deployment settings
+- **Template Engine**: `configs/ansible/templates/` - Jinja2 templates for config generation
+- **Configuration Generator**: `scripts/utils/config_generator.sh` - Dynamic config generation
+- **Generated Files**: Ansible configurations are generated automatically from templates
 
-The new unified system uses:
-- **Master Configuration**: `config/deployment.conf` - Single source of truth
-- **Configuration Manager**: `scripts/utils/config_manager.sh` - Generates all other config files
-- **Generated Files**: All other configuration files are auto-generated
+### Configuration Flow
+
+1. **Deploy Configuration**: Edit `config/deploy.conf` with all deployment settings
+2. **Template Processing**: Generator processes Jinja2 templates with variables from deploy.conf
+3. **File Generation**: Creates inventory, group_vars, and host_vars files
+4. **Ansible Deployment**: Uses generated configurations for deployment
 
 ## Master Configuration File
 
-The master configuration file `config/deployment.conf` contains all configuration parameters organized into logical sections:
+The master configuration file `config/deploy.conf` contains all configuration parameters organized into logical sections:
 
 ### Core System Settings
 ```bash
