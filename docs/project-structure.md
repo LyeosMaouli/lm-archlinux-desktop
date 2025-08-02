@@ -6,13 +6,14 @@
 
 This project has been **dramatically refactored** for simplicity while maintaining enterprise capabilities:
 
-- **Streamlined Architecture**: Removed 12 deprecated scripts for cleaner codebase
+- **Dynamic Configuration System**: Ansible configs generated automatically from deploy.conf
+- **Clean Architecture**: Removed redundancies and standardized all configurations
+- **Template-Based System**: Jinja2 templates for flexible configuration management
 - **Unified Interface**: Multiple confusing entry points → 1 clear deployment command (`deploy.sh`)
 - **Advanced Hybrid Password Management** with 4 secure methods
 - **GitHub CI/CD Integration** for enterprise deployment
 - **Comprehensive Security Framework** with enterprise-grade hardening
 - **Complete Power Management** for laptop optimization
-- **Enhanced Configuration System** with 100+ options
 
 ## 📁 Complete Directory Structure
 
@@ -38,22 +39,23 @@ lm-archlinux-desktop/
 │   └── 📂 plans/
 │       └── 📄 implementation-plan.md # Project completion status
 │
+├── 📄 bootstrap.conf                # Bootstrap deployment configuration
+│
 ├── 📂 config/                       # 🎯 Centralized Configuration
 │   ├── 📄 deploy.conf               # Main deployment configuration (ALL SETTINGS)
 │   └── 📄 example.deploy.conf       # Example configuration with mock data
 │
-├── 📂 configs/                      # 🔧 Legacy Configuration Management
+├── 📂 configs/                      # 🔧 Dynamic Configuration Management
 │   └── 📂 ansible/                  # Ansible automation framework
 │       ├── 📄 ansible.cfg           # Ansible configuration
 │       ├── 📄 requirements.yml      # External role dependencies
-│       ├── 📂 inventory/            # Host inventory definitions
-│       │   └── 📄 localhost.yml     # Local deployment inventory
-│       ├── 📂 group_vars/           # Global variable definitions
-│       │   └── 📂 all/
-│       │       └── 📄 vars.yml      # System-wide variables
-│       ├── 📂 host_vars/            # Host-specific variables
-│       │   └── 📂 phoenix/
-│       │       └── 📄 vars.yml      # Phoenix host variables
+│       ├── 📂 templates/            # 🆕 Dynamic Configuration Templates
+│       │   ├── 📄 group_vars.yml.j2 # Group variables template
+│       │   ├── 📄 host_vars.yml.j2  # Host variables template
+│       │   └── 📄 inventory.yml.j2  # Inventory template
+│       ├── 📂 inventory/            # Generated host inventory definitions
+│       ├── 📂 group_vars/           # Generated global variable definitions
+│       ├── 📂 host_vars/            # Generated host-specific variables
 │       ├── 📂 playbooks/            # 🎭 Deployment Playbooks
 │       │   ├── 📄 site.yml          # Master orchestration playbook
 │       │   ├── 📄 bootstrap.yml     # Initial system setup
@@ -125,6 +127,7 @@ lm-archlinux-desktop/
 │   │                                #     - Consistent CLI interface across all operations
 │   │
 │   ├── 📂 utils/                    # 🔧 Single-Purpose Utilities
+│   │   ├── 📄 config_generator.sh   # 🆕 Dynamic Ansible configuration generator
 │   │   ├── 📄 passwords.sh          # Password management (consolidated 4 scripts)
 │   │   ├── 📄 network.sh            # Network configuration and testing
 │   │   ├── 📄 hardware.sh           # Hardware detection and validation
@@ -151,11 +154,12 @@ lm-archlinux-desktop/
 │   ├── 📂 security/                 # 🔒 Security Scripts (legacy)
 │   └── 📂 utilities/                # 🛠️ Utility Scripts (legacy)
 │
-├── 📂 config/                       # ⚙️ Enhanced Configuration System
-│   └── 📄 deploy.conf               # Unified configuration (100+ options)
+├── 📂 config/                       # ⚙️ Dynamic Configuration System
+│   └── 📄 deploy.conf               # Single source of truth (100+ options)
 │                                    #     - User configuration with recommendations
 │                                    #     - System, network, security settings
 │                                    #     - Performance tuning parameters
+│                                    #     - Template variables for dynamic generation
 │
 ├── 📂 usb-deployment/               # 📱 Revolutionary USB Deployment System
 │   ├── 📄 README.md                 # USB deployment guide
@@ -173,22 +177,8 @@ lm-archlinux-desktop/
 │   ├── 📄 hardware_checker.sh       # Hardware compatibility validation
 │   └── 📄 backup_manager.sh         # Backup and restore system
 │
-├── 📂 templates/                    # 📝 Jinja2 Configuration Templates
-│   ├── 📂 systemd/                 # SystemD service templates
-│   │   ├── 📄 hyprland.service.j2   # Hyprland service configuration
-│   │   ├── 📄 power-management.service.j2 # Power management service
-│   │   └── 📄 maintenance.timer.j2  # Maintenance timer configuration
-│   ├── 📂 network/                 # Network configuration templates
-│   │   ├── 📄 wpa_supplicant.conf.j2 # WiFi configuration
-│   │   └── 📄 dhcpcd.conf.j2        # DHCP client configuration
-│   ├── 📂 security/                # Security configuration templates
-│   │   ├── 📄 ufw.rules.j2          # UFW firewall rules
-│   │   ├── 📄 fail2ban.local.j2     # Fail2ban configuration
-│   │   └── 📄 audit.rules.j2        # Audit system rules
-│   └── 📂 desktop/                 # Desktop environment templates
-│       ├── 📄 hyprland.conf.j2      # Main Hyprland configuration
-│       ├── 📄 waybar-config.j2      # Waybar status bar configuration
-│       └── 📄 autostart.j2          # Application autostart
+# Note: Templates are now located within each Ansible role's templates/ directory
+# Dynamic Ansible configuration templates are in configs/ansible/templates/
 │
 ├── 📂 files/                        # 📄 Static Files and Assets
 │   ├── 📂 wallpapers/              # Desktop wallpapers
@@ -227,7 +217,7 @@ lm-archlinux-desktop/
 │       ├── 📄 multi-user.sh         # Multi-user deployment
 │       └── 📄 enterprise.sh         # Enterprise deployment
 │
-└── 📂 profiles/                     # 📋 Deployment Profiles
+└── 📂 configs/profiles/             # 📋 Profile-Specific Configurations
     ├── 📂 work/                     # Work environment profile
     │   ├── 📄 archinstall.json      # Work-specific archinstall config
     │   ├── 📄 ansible-vars.yml      # Work environment variables
@@ -246,6 +236,8 @@ lm-archlinux-desktop/
 
 ### 🚀 Revolutionary Deployment System
 
+- **Dynamic Configuration**: Ansible configs generated automatically from deploy.conf
+- **Template-Based Generation**: Jinja2 templates for flexible configuration management
 - **USB Deployment**: Edit config on main PC, deploy with zero typing errors
 - **Zero-Touch Installation**: Answer 3 questions, get complete desktop
 - **Advanced Password Management**: 4 secure methods with encryption
