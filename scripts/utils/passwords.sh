@@ -463,7 +463,7 @@ load_file_passwords() {
     local password_file="$PASSWORD_FILE"
     if [[ -z "${password_file:-}" ]]; then
         # Try common locations
-        for candidate in "$PROJECT_ROOT/config/passwords.enc" "$PROJECT_ROOT/passwords.enc" "./passwords.enc"; do
+        for candidate in "$PROJECT_ROOT/deploy-config/passwords.enc" "$PROJECT_ROOT/passwords.enc" "./passwords.enc"; do
             if [[ -f "$candidate" ]]; then
                 password_file="$candidate"
                 break

@@ -610,9 +610,9 @@ load_configuration() {
         # Try multiple paths for default config file
         local config_paths=(
             "$CONFIG_DIR/deploy.conf"                    # Standard project structure
-            "$PROJECT_ROOT/config/deploy.conf"           # Alternative path
-            "$SCRIPT_DIR/../config/deploy.conf"          # When in scripts directory
-            "$SCRIPT_DIR/../../config/deploy.conf"       # When in scripts/internal
+            "$PROJECT_ROOT/deploy-config/deploy.conf"    # Alternative path
+            "$SCRIPT_DIR/../deploy-config/deploy.conf"   # When in scripts directory
+            "$SCRIPT_DIR/../../deploy-config/deploy.conf" # When in scripts/internal
         )
         
         local config_loaded=false

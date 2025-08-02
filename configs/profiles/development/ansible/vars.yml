@@ -1,6 +1,6 @@
 ---
 # development Profile Configuration
-# Generated from config/deploy.conf - DO NOT EDIT MANUALLY
+# Generated from deploy-config/deploy.conf - DO NOT EDIT MANUALLY
 
 profile_name: "development"
 profile_type: "DEVELOPMENT"

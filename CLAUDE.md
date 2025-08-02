@@ -67,7 +67,7 @@ lm-archlinux-desktop/
 ├── 📄 example_bootstrap.conf        # Example bootstrap configuration
 ├── 📄 requirements.txt              # Python/Ansible dependencies
 │
-├── 📂 config/                       # 🔧 Configuration Files
+├── 📂 deploy-config/                # 🔧 Configuration Files
 │   ├── 📄 deploy.conf               # Default deployment configuration
 │   └── 📄 example.deploy.conf       # Example deployment configuration
 │
@@ -605,7 +605,7 @@ make test
 
 - **Main Entry Point**: `local.yml` - Ansible playbook for ansible-pull deployment
 - **Unified CLI**: `scripts/deploy.sh` - Single script for all deployment operations
-- **Configuration**: `config/deploy.conf` - Main deployment configuration
+- **Configuration**: `deploy-config/deploy.conf` - Main deployment configuration
 - **Role-Based**: Modular Ansible roles for each system component
 - **Template-Driven**: Jinja2 templates for dynamic configuration generation
 - **VM Testing**: `scripts/testing/auto_vm_test.sh` - Comprehensive automated testing

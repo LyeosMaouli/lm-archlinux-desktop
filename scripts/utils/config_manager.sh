@@ -4,7 +4,7 @@
 #
 # This script manages the simplified two-file configuration system:
 # 1. bootstrap.conf - Pre-download configuration (minimal)
-# 2. config/deploy.conf - Post-download detailed deployment settings
+# 2. deploy-config/deploy.conf - Post-download detailed deployment settings
 #
 # Usage:
 #   ./config_manager.sh validate-bootstrap    # Validate bootstrap configuration
@@ -267,7 +267,7 @@ generate_ansible_vars() {
     cat > "$output_file" << EOF
 ---
 # $profile Profile Configuration
-# Generated from config/deploy.conf - DO NOT EDIT MANUALLY
+# Generated from deploy-config/deploy.conf - DO NOT EDIT MANUALLY
 
 profile_name: "$profile"
 profile_type: "${profile^^}"
@@ -506,7 +506,7 @@ USAGE:
 
 COMMANDS:
     validate-bootstrap   Validate bootstrap configuration (bootstrap.conf)
-    validate-deploy      Validate deployment configuration (config/deploy.conf)
+    validate-deploy      Validate deployment configuration (deploy-config/deploy.conf)
     validate-all         Validate both configuration files
     sync-settings        Sync common settings from bootstrap to deployment config
     generate-profiles    Generate profile-specific configuration files
@@ -520,7 +520,7 @@ DESCRIPTION:
     1. bootstrap.conf - Contains ONLY information needed before downloading
        the repository (repo URL, basic identity, network, profile selection)
        
-    2. config/deploy.conf - Contains detailed deployment settings used after
+    2. deploy-config/deploy.conf - Contains detailed deployment settings used after
        the repository is downloaded (security, packages, desktop, etc.)
        
     This eliminates redundancy while maintaining clear separation of concerns.
@@ -532,7 +532,7 @@ EXAMPLES:
 
 WORKFLOW:
     1. Edit bootstrap.conf with basic settings
-    2. Edit config/deploy.conf with detailed deployment settings  
+    2. Edit deploy-config/deploy.conf with detailed deployment settings  
     3. Run validate-all to check configuration
     4. Use sync-settings to keep common values synchronized
     5. Generate profile-specific configs as needed

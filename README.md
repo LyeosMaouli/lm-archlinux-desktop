@@ -21,7 +21,7 @@
 ./scripts/deploy.sh security  # Security hardening
 
 # Automatic configuration detection - supports all deployment methods
-./scripts/deploy.sh full --config config/deploy.conf
+./scripts/deploy.sh full --config deploy-config/deploy.conf
 ```
 
 ### Key Improvements
@@ -51,7 +51,7 @@
 
 ### 📱 **USB Deployment System** _(No More Typing Errors!)_
 
-- **Centralized Configuration**: Single `config/deploy.conf` file for all settings
+- **Centralized Configuration**: Single `deploy-config/deploy.conf` file for all settings
 - **Pre-configured Scripts**: Edit settings on your main computer, deploy on target
 - **Zero Console Typing**: No long commands to type in Arch Linux console
 - **Error-Free Deployment**: Eliminates human error in manual command entry
@@ -129,7 +129,7 @@ Simplified development approach for maximum productivity:
 
 ### ⚙️ Dynamic Configuration System
 
-- **Single Source of Truth** - All configuration in `config/deploy.conf`
+- **Single Source of Truth** - All configuration in `deploy-config/deploy.conf`
 - **Dynamic Generation** - Ansible configurations generated dynamically from deploy.conf
 - **Template-Based** - Jinja2 templates for flexible configuration management
 - **Profile Support** - Work, personal, and development environment configurations

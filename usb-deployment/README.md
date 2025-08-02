@@ -6,7 +6,7 @@ This folder contains everything you need to deploy the **enhanced Arch Linux Hyp
 
 ## 📋 What You Get
 
-- **Centralized Configuration** - Single `config/deploy.conf` file for all settings
+- **Centralized Configuration** - Single `deploy-config/deploy.conf` file for all settings
 - **One script to run everything** - No long command typing required
 - **Automatic Dependencies** - Missing packages installed automatically
 - **Complete Project Structure** - Downloads entire repository with all tools
@@ -32,7 +32,7 @@ This folder contains everything you need to deploy the **enhanced Arch Linux Hyp
 
 2. **Configure deployment settings**:
    ```bash
-   # Edit config/deploy.conf in your repository for main settings:
+   # Edit deploy-config/deploy.conf in your repository for main settings:
    USER_NAME="yourusername"
    HOSTNAME="your-hostname"
    PASSWORD_MODE="generate"
@@ -67,10 +67,10 @@ That's it! The script handles everything else automatically.
 ## ⚙️ Configuration System
 
 ### 🎯 New Centralized Configuration
-Main system settings are now in `config/deploy.conf` (automatically loaded):
+Main system settings are now in `deploy-config/deploy.conf` (automatically loaded):
 
 ```bash
-# Primary configuration in config/deploy.conf:
+# Primary configuration in deploy-config/deploy.conf:
 USER_NAME="yourusername"            # System username
 HOSTNAME="your-hostname"            # System hostname  
 PASSWORD_MODE="generate"            # Password handling method
@@ -123,10 +123,10 @@ PASSWORD_MODE="interactive"
 ```
 
 ### Legacy System Configuration (Deprecated)
-**Note**: These settings are now managed in `config/deploy.conf`. The USB script automatically loads the centralized configuration.
+**Note**: These settings are now managed in `deploy-config/deploy.conf`. The USB script automatically loads the centralized configuration.
 
 ```bash
-# These settings are now in config/deploy.conf:
+# These settings are now in deploy-config/deploy.conf:
 # USER_NAME="myuser"                # Main user account name  
 # HOSTNAME="my-archlinux"           # System hostname
 # TIMEZONE="America/New_York"       # System timezone

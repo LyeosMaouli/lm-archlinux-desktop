@@ -81,7 +81,7 @@ git pull origin develop
 # Edit Ansible roles, scripts, documentation, etc.
 
 # 3. Test dynamic configuration generation
-./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
+./scripts/utils/config_generator.sh --config deploy-config/deploy.conf --dry-run
 
 # 4. Validate changes
 ansible-lint configs/ansible/
@@ -104,7 +104,7 @@ git push origin develop
 
 ```bash
 # Test dynamic configuration generation
-./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run --verbose
+./scripts/utils/config_generator.sh --config deploy-config/deploy.conf --dry-run --verbose
 
 # Test deployment without execution
 ./scripts/deploy.sh full --dry-run --verbose
