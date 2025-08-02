@@ -1,209 +1,62 @@
 # Documentation Index
 
-Welcome to the **Next-Generation Arch Linux Hyprland Desktop Automation** documentation!
+**Arch Linux Hyprland Desktop Automation** - Enterprise-grade automation for complete, secure desktop environments.
 
-## 🆕 **What's New**
+## Quick Start
 
-This documentation now covers the **latest enhancements** including:
-
-- **🔧 Dynamic Configuration System** - Ansible configs generated automatically from deploy.conf
-- **🧹 Clean Architecture** - Removed redundancies and standardized all configurations
-- **📋 Template-Based Generation** - Jinja2 templates for flexible configuration management
-- **⚡ Performance Optimizations** - 3x faster deployments with parallel processing
-- **📊 Structured Logging** - JSON-based logging with correlation tracking
-- **🔒 Enhanced Security** - Advanced security hardening and audit logging
-- **📈 Performance Monitoring** - Built-in deployment analytics and optimization
-
-## 🚀 Getting Started
-
-### Quick Start Guides
-
-- **[Installation Guide](installation-guide.md)** - Complete deployment instructions with full automation
-- **[Development Instructions](development-instructions.md)** - Direct development workflow setup
-- **[VirtualBox Testing](virtualbox-testing-guide.md)** - Safe testing environment setup
-
-### Configuration
-
-- **[Dynamic Configuration Guide](configuration-system-guide.md)** - Template-based configuration system
-- **[Deploy Configuration](../config/deploy.conf)** - Main deployment configuration file
+- **[Installation Guide](installation-guide.md)** - Complete deployment methods
+- **[Project Architecture](project-structure.md)** - System architecture and components
 - **[Password Management](password-management.md)** - Advanced password system
+- **[VirtualBox Testing](virtualbox-testing-guide.md)** - Testing environment
 
-## 📚 Project Documentation
+## Advanced Documentation
 
-### Development
+- **[Development Instructions](development-instructions.md)** - Development workflow
+- **[GitHub CI/CD](github-password-storage.md)** - Enterprise deployment
+- **[Target Deployment](target-computer-deployment.md)** - Remote deployment
+- **[Security Policy](../SECURITY.md)** - Security guidelines
 
-- **[Development Instructions](development-instructions.md)** - Direct development workflows
-- **[Project Structure](project-structure.md)** - Complete codebase documentation
-- **[Enhancement Opportunities](improvements/enhancement-opportunities.md)** - 🆕 System improvement analysis
-- **[Improvement Plan](improvements/improvement-plan.md)** - 🆕 Strategic enhancement roadmap
-- **[Issue Tracking](fixes/)** - 🆕 Systematic issue resolution documentation
+## Technical Overview
 
-### Security
-
-- **[Security Policy](../SECURITY.md)** - Security guidelines and best practices
-
-## 🛠️ Technical Documentation
-
-### 🆕 Dynamic Configuration System
-
-- **Template Engine**: Located in `configs/ansible/templates/`
-  - Dynamic Ansible configuration generation from deploy.conf
-  - Jinja2 templates for flexible configuration management
-  - Profile-specific configurations (work, personal, development)
-  - Automatic variable substitution and validation
-- **Configuration Generator**: `scripts/utils/config_generator.sh`
-  - Parses deploy.conf and generates Ansible configurations
-  - Supports dry-run mode for safe testing
-  - Comprehensive error handling and validation
+### Core Components
+- **Dynamic Configuration**: Template-based Ansible generation from `deploy.conf`
+- **Unified Interface**: Single `deploy.sh` command for all operations
+- **Security Framework**: Multi-layered security with encryption and hardening
+- **Profile Support**: Work, personal, development configurations
 
 ### Architecture
+- **Ansible Roles**: `base_system`, `users_security`, `hyprland_desktop`, `aur_packages`, `system_hardening`, `power_management`
+- **Deployment Scripts**: `deploy.sh`, testing utilities, maintenance tools
+- **Configuration**: Template-driven dynamic configuration system
 
-- **Ansible Roles**: Located in `configs/ansible/roles/`
-  - `base_system/` - Core system configuration
-  - `users_security/` - User management and SSH hardening
-  - `hyprland_desktop/` - Desktop environment setup
-  - `aur_packages/` - AUR package management
-  - `system_hardening/` - Security hardening
-  - `power_management/` - Laptop optimization
-
-### Scripts
-
-- **Deployment Scripts**: Located in `scripts/`
-
-  - `deploy.sh` - Unified deployment interface with dynamic config generation
-  - `deployment/auto_install.sh` - Automated base system installation
-  - `deployment/profile_manager.sh` - Profile management utility
-  - `deployment/auto_post_install.sh` - Post-installation validation
-  - `utils/config_generator.sh` - Dynamic Ansible configuration generator
-
-- **Testing Scripts**: Located in `scripts/testing/`
-
-  - `auto_vm_test.sh` - Automated VirtualBox testing
-
-- **Utilities**: Located in `scripts/utilities/`
-  - `network_auto_setup.sh` - Network automation
-
-### Configuration Files
-
-- **Main Configuration**: `config/deploy.conf` - Single source of truth for all settings
-- **Bootstrap Configuration**: `bootstrap.conf` - Bootstrap deployment settings
-- **Dynamic Templates**: `configs/ansible/templates/` - Jinja2 templates for config generation
-- **Generated Files**: `configs/ansible/` - Dynamically generated Ansible configurations
-
-## 🎯 Common Tasks
-
-### 🆕 Dynamic Configuration Development
+## Common Commands
 
 ```bash
-# Clone repository for development
-git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
-cd lm-archlinux-desktop
-
-# Test dynamic configuration generation
-./scripts/deploy.sh full --dry-run --verbose
-
-# Generate configs manually for testing
-./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run
-
-# Validate generated configurations
-ansible-lint configs/ansible/
-```
-
-### Installation
-
-```bash
-# Bootstrap deployment (recommended)
-wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.sh
-wget https://raw.githubusercontent.com/LyeosMaouli/lm-archlinux-desktop/main/bootstrap.conf
-chmod +x bootstrap.sh
-./bootstrap.sh full
-
-# Development deployment
-git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git && cd lm-archlinux-desktop
+# Quick deployment
 ./scripts/deploy.sh full
-```
 
-### Testing
-
-```bash
-# Bootstrap testing (recommended)
-./bootstrap.sh testing --verbose
+# Test configuration
+./scripts/deploy.sh full --dry-run
 
 # VirtualBox testing
 ./scripts/testing/auto_vm_test.sh
 
-# Installation validation
-./scripts/testing/test_installation.sh
+# System health check
+./tools/system_info.sh
 ```
 
-### Maintenance
+## Troubleshooting
 
-```bash
-# System status with performance monitoring
-system-status
+**Common issues:**
+- Network: `./scripts/utilities/network_auto_setup.sh recovery`
+- SSH keys: Auto-generated, view with `cat ~/.ssh/id_rsa.pub`
+- Deployment: Use `--dry-run` and check logs in `/var/log/`
 
-# System updates
-system-update
-
-# Security audit with structured logging
-sudo /usr/local/bin/audit-analysis
-
-# 🆕 Configuration management
-./scripts/utils/config_generator.sh --config config/deploy.conf --dry-run  # Test config generation
-ansible-lint configs/ansible/    # Validate generated configurations
-./scripts/deploy.sh full --dry-run  # Preview deployment actions
-```
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Network connectivity problems:**
-
-```bash
-# Run network recovery
-./scripts/utilities/network_auto_setup.sh recovery
-```
-
-**SSH key issues:**
-
-```bash
-# Keys are automatically generated
-# View public key: cat ~/.ssh/id_rsa.pub
-# Add to GitHub: https://github.com/settings/keys
-```
-
-**Ansible deployment failures:**
-
-```bash
-# Run with verbose output
-ansible-playbook -vvv -i configs/ansible/inventory/localhost.yml local.yml
-```
-
-### Log Locations
-
-- **Main deployment**: `/var/log/deploy.log`
-- **VM testing**: `/var/log/auto_vm_test.log`
-- **Network setup**: `/var/log/network_auto_setup.log`
-- **Ansible**: `/var/log/ansible.log`
-
-## 📞 Support
-
-### Getting Help
-
-1. Check this documentation
-2. Review log files for errors
-3. Test in VirtualBox VM first
-4. Create GitHub issue with logs and system info
-
-### Contributing
-
-1. Fork the repository
-2. Test changes in VirtualBox
-3. Follow existing code style
-4. Update documentation
-5. Submit pull request
+**Support:**
+1. Check documentation and logs
+2. Test in VirtualBox first
+3. Create GitHub issue with system info
 
 ---
 
-**Need help?** Start with the [Installation Guide](installation-guide.md) for step-by-step instructions.
+**Get started:** [Installation Guide](installation-guide.md)
