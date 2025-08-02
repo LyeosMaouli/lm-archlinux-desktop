@@ -600,6 +600,14 @@ EOF
 #
 
 load_configuration() {
+    # Save command-line values before loading config file
+    local cli_hostname="$HOSTNAME"
+    local cli_user_name="$USER_NAME"
+    local cli_profile="$PROFILE"
+    local cli_password_mode="$PASSWORD_MODE"
+    local cli_network_mode="$NETWORK_MODE"
+    local cli_encryption="$ENCRYPTION_ENABLED"
+    
     # Load from config file if it exists
     if [[ -n "${CONFIG_FILE:-}" ]]; then
         if ! load_config "$CONFIG_FILE"; then
@@ -632,15 +640,21 @@ load_configuration() {
         fi
     fi
     
-    # Override with any values from config (using get_config function if available)
-    if command -v get_config >/dev/null 2>&1; then
-        PROFILE="${PROFILE:-$(get_config "PROFILE" "$DEFAULT_PROFILE")}"
-        PASSWORD_MODE="${PASSWORD_MODE:-$(get_config "PASSWORD_MODE" "$DEFAULT_PASSWORD_MODE")}"
-        NETWORK_MODE="${NETWORK_MODE:-$(get_config "NETWORK_MODE" "$DEFAULT_NETWORK_MODE")}"
-        HOSTNAME="${HOSTNAME:-$(get_config "HOSTNAME" "$DEFAULT_HOSTNAME")}"
-        USER_NAME="${USER_NAME:-$(get_config "USER_NAME" "$DEFAULT_USER")}"
-        ENCRYPTION_ENABLED="${ENCRYPTION_ENABLED:-$(get_config "ENCRYPTION_ENABLED" "$DEFAULT_ENCRYPTION")}"
-    fi
+    # Restore command-line values (command-line takes precedence over config file)
+    [[ "$cli_hostname" != "$DEFAULT_HOSTNAME" ]] && HOSTNAME="$cli_hostname"
+    [[ "$cli_user_name" != "$DEFAULT_USER" ]] && USER_NAME="$cli_user_name"
+    [[ "$cli_profile" != "$DEFAULT_PROFILE" ]] && PROFILE="$cli_profile"
+    [[ "$cli_password_mode" != "$DEFAULT_PASSWORD_MODE" ]] && PASSWORD_MODE="$cli_password_mode"
+    [[ "$cli_network_mode" != "$DEFAULT_NETWORK_MODE" ]] && NETWORK_MODE="$cli_network_mode"
+    [[ "$cli_encryption" != "$DEFAULT_ENCRYPTION" ]] && ENCRYPTION_ENABLED="$cli_encryption"
+    
+    # Use defaults for any values not set by command-line or config file
+    PROFILE="${PROFILE:-$DEFAULT_PROFILE}"
+    PASSWORD_MODE="${PASSWORD_MODE:-$DEFAULT_PASSWORD_MODE}"
+    NETWORK_MODE="${NETWORK_MODE:-$DEFAULT_NETWORK_MODE}"
+    HOSTNAME="${HOSTNAME:-$DEFAULT_HOSTNAME}"
+    USER_NAME="${USER_NAME:-$DEFAULT_USER}"
+    ENCRYPTION_ENABLED="${ENCRYPTION_ENABLED:-$DEFAULT_ENCRYPTION}"
 }
 
 # Generate dynamic Ansible configuration files from deploy.conf
@@ -655,6 +669,11 @@ generate_ansible_configs() {
         log_error "Config generator script not found: $config_generator"
         return $EXIT_CONFIG_ERROR
     fi
+    
+    # Export current configuration as environment variables 
+    # so config generator can use command-line values instead of placeholders
+    export USER_NAME HOSTNAME PROFILE ENCRYPTION_ENABLED NETWORK_MODE
+    export PASSWORD_MODE DRY_RUN
     
     # Prepare config generator arguments
     local generator_args=()
@@ -763,6 +782,12 @@ parse_arguments() {
             exit "${EXIT_INVALID_ARGS:-1}"
             ;;
     esac
+    
+    # Special handling for help command - ignore extra arguments
+    if [[ "$COMMAND" == "help" ]]; then
+        show_detailed_help
+        exit "${EXIT_SUCCESS:-0}"
+    fi
     
     # Parse options
     while [[ $# -gt 0 ]]; do
@@ -938,10 +963,11 @@ validate_arguments() {
         fi
     fi
     
-    # Validate hostname
-    if [[ ! "$HOSTNAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}[a-zA-Z0-9]?$ ]]; then
+    # Validate hostname (1-63 characters, alphanumeric and hyphens, cannot start/end with hyphen)
+    if [[ ! "$HOSTNAME" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]]; then
         log_error "Invalid hostname: $HOSTNAME"
-        log_error "Hostname must contain only letters, numbers, and hyphens"
+        log_error "Hostname must be 1-63 characters, contain only letters, numbers, and hyphens"
+        log_error "Hostname cannot start or end with a hyphen"
         exit $EXIT_INVALID_ARGS
     fi
     
