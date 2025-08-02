@@ -5,11 +5,30 @@
 set -euo pipefail
 
 # Load common functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../internal/common.sh" || {
-    echo "Error: Cannot load common.sh"
+if [[ -z "${SCRIPT_DIR:-}" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is deployment/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
     exit 1
-}
+fi
 
 # Global variables for storing secure data
 USER_PASSWORD=""
