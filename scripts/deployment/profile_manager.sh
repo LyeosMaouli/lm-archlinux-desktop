@@ -8,10 +8,26 @@ set -euo pipefail
 if [[ -z "${SCRIPT_DIR:-}" ]]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
-source "$SCRIPT_DIR/../internal/common.sh" || {
-    echo "Error: Cannot load common.sh"
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is deployment/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
     exit 1
-}
+fi
 
 # Configuration
 if [[ -z "${PROJECT_ROOT:-}" ]]; then
@@ -416,6 +432,7 @@ main() {
             ;;
         *)
             error "Unknown command: $command. Use --help for usage information."
+            exit 1
             ;;
     esac
 }

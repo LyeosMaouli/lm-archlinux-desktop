@@ -121,6 +121,7 @@ parse_arguments() {
                 ;;
             *)
                 error "Unknown option: $1. Use --help for usage information."
+                exit 1
                 ;;
         esac
     done
@@ -392,7 +393,7 @@ FILES INCLUDED:
 - profiles/: Configuration profiles
 
 For more information, visit:
-https://github.com/LyeosMaouli/lm_archlinux_desktop
+https://github.com/LyeosMaouli/lm-archlinux-desktop
 
 Generated: $(date)
 EOF

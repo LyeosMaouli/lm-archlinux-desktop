@@ -12,11 +12,11 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/LyeosMaouli/lm_archlinux_desktop.git"
+REPO_URL="https://github.com/LyeosMaouli/lm-archlinux-desktop.git"
 CONFIG_FILE="${CONFIG_FILE:-/tmp/vm_deployment_config.yml}"
 LOG_FILE="/var/log/auto_vm_test.log"
 VERBOSE_LOG="/var/log/auto_vm_test_verbose.log"
-INSTALL_DIR="$HOME/lm_archlinux_desktop"
+INSTALL_DIR="$HOME/lm-archlinux-desktop"
 
 # Enhanced logging setup for VM testing
 setup_vm_logging() {
@@ -143,8 +143,8 @@ disk:
     enabled: true
     passphrase: "test123"  # Simple passphrase for testing
   partitions:
-    efi_size: "512M"
-    swap_size: "2G"  # Smaller for VM
+    efi_size: "128M"  # Minimal EFI size to maximize root partition space
+    # Note: No swap partition - using zram instead
   filesystem: "ext4"
 
 # Bootloader Configuration

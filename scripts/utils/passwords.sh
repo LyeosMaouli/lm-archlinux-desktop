@@ -24,8 +24,27 @@ set -euo pipefail
 if [[ -z "${SCRIPT_DIR:-}" ]]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
-# shellcheck source=../internal/common.sh  
-source "$SCRIPT_DIR/../internal/common.sh"
+
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is utils/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
+    exit 1
+fi
 
 # Password management configuration
 readonly PASSWORD_MIN_LENGTH=8
@@ -343,10 +362,17 @@ verify_encrypted_file() {
         return 1
     fi
     
-    # Check for our metadata header
-    if ! grep -q "^# ENCRYPTED PASSWORD FILE" "$file"; then
-        log_error "Invalid password file format (missing header)"
-        return 1
+    # Check for supported password file formats
+    if grep -q "^# ENCRYPTED PASSWORD FILE" "$file"; then
+        log_debug "Detected project native password file format"
+    else
+        # Check if it might be a GitHub Actions generated file (binary encrypted data)
+        if file "$file" | grep -q "data"; then
+            log_debug "Detected possible GitHub Actions workflow password file format"
+        else
+            log_error "Invalid password file format (missing header and not recognized binary format)"
+            return 1
+        fi
     fi
     
     log_debug "Password file verified: $file (size: $file_size bytes)"
@@ -388,41 +414,63 @@ decrypt_password_file() {
         return 1
     fi
     
-    # Extract encrypted data (skip metadata lines)
-    local encrypted_data
-    encrypted_data=$(grep -v '^#' "$file" | tr -d '\n')
-    
-    if [[ -z "${encrypted_data:-}" ]]; then
-        log_error "No encrypted data found in file"
-        return 1
-    fi
-    
-    # Extract metadata for decryption parameters
-    local metadata
-    metadata=$(extract_file_metadata "$file")
-    local cipher
-    cipher=$(echo "$metadata" | cut -d'|' -f2)
-    local iterations
-    iterations=$(echo "$metadata" | cut -d'|' -f3)
-    
-    # Use metadata or defaults
-    cipher="${cipher:-$AES_CIPHER}"
-    iterations="${iterations:-$PBKDF2_ITERATIONS}"
-    
-    # Decrypt the data
     local temp_file="/tmp/password_decrypt_$$"
     trap 'shred -f "$temp_file" 2>/dev/null || rm -f "$temp_file"' RETURN
     
-    if echo "$encrypted_data" | base64 -d | \
-       openssl enc -d "-$cipher" -pbkdf2 -iter "$iterations" -pass pass:"$passphrase" \
-       > "$temp_file" 2>/dev/null; then
+    # Check if this is project native format or GitHub Actions format
+    if grep -q "^# ENCRYPTED PASSWORD FILE" "$file"; then
+        log_debug "Decrypting project native format password file"
         
-        # Return decrypted content
-        cat "$temp_file"
-        return 0
+        # Extract encrypted data (skip metadata lines)
+        local encrypted_data
+        encrypted_data=$(grep -v '^#' "$file" | tr -d '\n')
+        
+        if [[ -z "${encrypted_data:-}" ]]; then
+            log_error "No encrypted data found in file"
+            return 1
+        fi
+        
+        # Extract metadata for decryption parameters
+        local metadata
+        metadata=$(extract_file_metadata "$file")
+        local cipher
+        cipher=$(echo "$metadata" | cut -d'|' -f2)
+        local iterations
+        iterations=$(echo "$metadata" | cut -d'|' -f3)
+        
+        # Use metadata or defaults
+        cipher="${cipher:-$AES_CIPHER}"
+        iterations="${iterations:-$PBKDF2_ITERATIONS}"
+        
+        # Decrypt the data
+        if echo "$encrypted_data" | base64 -d | \
+           openssl enc -d "-$cipher" -pbkdf2 -iter "$iterations" -pass pass:"$passphrase" \
+           > "$temp_file" 2>/dev/null; then
+            
+            # Return decrypted content
+            cat "$temp_file"
+            return 0
+        else
+            log_error "Failed to decrypt password file (wrong passphrase?)"
+            return 1
+        fi
+        
     else
-        log_error "Failed to decrypt password file (wrong passphrase?)"
-        return 1
+        log_debug "Attempting to decrypt GitHub Actions format password file"
+        
+        # Try to decrypt using GitHub Actions format (direct OpenSSL)
+        if openssl enc -d -aes-256-cbc -salt -pbkdf2 -iter 100000 \
+           -in "$file" -pass pass:"$passphrase" \
+           > "$temp_file" 2>/dev/null; then
+            
+            log_debug "Successfully decrypted GitHub Actions format file"
+            # Return decrypted content
+            cat "$temp_file"
+            return 0
+        else
+            log_error "Failed to decrypt password file (wrong passphrase or unsupported format?)"
+            return 1
+        fi
     fi
 }
 
@@ -434,7 +482,7 @@ load_file_passwords() {
     local password_file="$PASSWORD_FILE"
     if [[ -z "${password_file:-}" ]]; then
         # Try common locations
-        for candidate in "$PROJECT_ROOT/config/passwords.enc" "$PROJECT_ROOT/passwords.enc" "./passwords.enc"; do
+        for candidate in "$PROJECT_ROOT/deploy-config/passwords.enc" "$PROJECT_ROOT/passwords.enc" "./passwords.enc"; do
             if [[ -f "$candidate" ]]; then
                 password_file="$candidate"
                 break
@@ -469,36 +517,102 @@ load_file_passwords() {
     
     local loaded_count=0
     
-    # Parse decrypted content
-    while IFS='=' read -r key value; do
-        # Skip empty lines and comments
-        [[ -z "${key:-}" || "$key" =~ ^[[:space:]]*# ]] && continue
+    # Detect content format and parse accordingly
+    if echo "$decrypted_content" | grep -q "^#!/bin/bash" || echo "$decrypted_content" | grep -q "^export DEPLOY_"; then
+        log_debug "Processing ENV format password file"
+        # Parse environment variable format
+        while IFS='=' read -r key value; do
+            # Skip empty lines, comments, and shebang
+            [[ -z "${key:-}" || "$key" =~ ^[[:space:]]*# || "$key" =~ ^#!/ ]] && continue
+            
+            # Handle export statements
+            if [[ "$key" =~ ^export[[:space:]]+ ]]; then
+                key=$(echo "$key" | sed 's/^export[[:space:]]*//')
+            fi
+            
+            # Clean up key and value (remove quotes)
+            key=$(echo "$key" | tr -d '[:space:]')
+            value=$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '"'"'"'')
+            
+            case "$key" in
+                "DEPLOY_USER_PASSWORD")
+                    if validate_env_password "$value" "user password"; then
+                        set_password "user" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+                "DEPLOY_ROOT_PASSWORD")
+                    if validate_env_password "$value" "root password"; then
+                        set_password "root" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+                "DEPLOY_LUKS_PASSPHRASE")
+                    if validate_env_password "$value" "LUKS passphrase"; then
+                        set_password "luks" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+            esac
+        done <<< "$decrypted_content"
         
-        # Clean up key and value
-        key=$(echo "$key" | tr -d '[:space:]')
-        value=$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    elif echo "$decrypted_content" | grep -q "user_password:" || echo "$decrypted_content" | grep -q "passwords:"; then
+        log_debug "Processing YAML format password file"
+        # Parse YAML format (simple parsing)
+        local user_pass root_pass luks_pass
+        user_pass=$(echo "$decrypted_content" | grep "user_password:" | sed 's/.*user_password:[[:space:]]*"//' | sed 's/".*//')
+        root_pass=$(echo "$decrypted_content" | grep "root_password:" | sed 's/.*root_password:[[:space:]]*"//' | sed 's/".*//')
+        luks_pass=$(echo "$decrypted_content" | grep "luks_passphrase:" | sed 's/.*luks_passphrase:[[:space:]]*"//' | sed 's/".*//')
         
-        case "$key" in
-            "user_password"|"USER_PASSWORD")
-                if validate_env_password "$value" "user password"; then
-                    set_password "user" "$value"
-                    ((loaded_count++))
-                fi
-                ;;
-            "root_password"|"ROOT_PASSWORD")
-                if validate_env_password "$value" "root password"; then
-                    set_password "root" "$value"
-                    ((loaded_count++))
-                fi
-                ;;
-            "luks_passphrase"|"LUKS_PASSPHRASE")
-                if validate_env_password "$value" "LUKS passphrase"; then
-                    set_password "luks" "$value"
-                    ((loaded_count++))
-                fi
-                ;;
-        esac
-    done <<< "$decrypted_content"
+        [[ -n "$user_pass" ]] && validate_env_password "$user_pass" "user password" && set_password "user" "$user_pass" && ((loaded_count++))
+        [[ -n "$root_pass" ]] && validate_env_password "$root_pass" "root password" && set_password "root" "$root_pass" && ((loaded_count++))
+        [[ -n "$luks_pass" ]] && validate_env_password "$luks_pass" "LUKS passphrase" && set_password "luks" "$luks_pass" && ((loaded_count++))
+        
+    elif echo "$decrypted_content" | grep -q '"user_password"' || echo "$decrypted_content" | grep -q '"passwords"'; then
+        log_debug "Processing JSON format password file"
+        # Parse JSON format (simple parsing)
+        local user_pass root_pass luks_pass
+        user_pass=$(echo "$decrypted_content" | grep '"user_password"' | sed 's/.*"user_password"[[:space:]]*:[[:space:]]*"//' | sed 's/".*//')
+        root_pass=$(echo "$decrypted_content" | grep '"root_password"' | sed 's/.*"root_password"[[:space:]]*:[[:space:]]*"//' | sed 's/".*//')
+        luks_pass=$(echo "$decrypted_content" | grep '"luks_passphrase"' | sed 's/.*"luks_passphrase"[[:space:]]*:[[:space:]]*"//' | sed 's/".*//')
+        
+        [[ -n "$user_pass" ]] && validate_env_password "$user_pass" "user password" && set_password "user" "$user_pass" && ((loaded_count++))
+        [[ -n "$root_pass" ]] && validate_env_password "$root_pass" "root password" && set_password "root" "$root_pass" && ((loaded_count++))
+        [[ -n "$luks_pass" ]] && validate_env_password "$luks_pass" "LUKS passphrase" && set_password "luks" "$luks_pass" && ((loaded_count++))
+        
+    else
+        log_debug "Processing legacy key=value format"
+        # Parse legacy key=value format
+        while IFS='=' read -r key value; do
+            # Skip empty lines and comments
+            [[ -z "${key:-}" || "$key" =~ ^[[:space:]]*# ]] && continue
+            
+            # Clean up key and value
+            key=$(echo "$key" | tr -d '[:space:]')
+            value=$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            
+            case "$key" in
+                "user_password"|"USER_PASSWORD")
+                    if validate_env_password "$value" "user password"; then
+                        set_password "user" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+                "root_password"|"ROOT_PASSWORD")
+                    if validate_env_password "$value" "root password"; then
+                        set_password "root" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+                "luks_passphrase"|"LUKS_PASSPHRASE")
+                    if validate_env_password "$value" "LUKS passphrase"; then
+                        set_password "luks" "$value"
+                        ((loaded_count++))
+                    fi
+                    ;;
+            esac
+        done <<< "$decrypted_content"
+    fi
     
     if [[ $loaded_count -gt 0 ]]; then
         log_info "Loaded $loaded_count passwords from encrypted file"

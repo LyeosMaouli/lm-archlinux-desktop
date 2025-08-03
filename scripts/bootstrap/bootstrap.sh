@@ -34,8 +34,8 @@ else
 fi
 
 # Configuration
-REPO_URL="https://github.com/LyeosMaouli/lm_archlinux_desktop.git"
-INSTALL_DIR="$HOME/lm_archlinux_desktop"
+REPO_URL="https://github.com/LyeosMaouli/lm-archlinux-desktop.git"
+INSTALL_DIR="$HOME/lm-archlinux-desktop"
 REQUIRED_PACKAGES=("git" "ansible" "python" "python-pip" "base-devel")
 
 # Default values

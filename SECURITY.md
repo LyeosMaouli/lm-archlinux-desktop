@@ -11,10 +11,11 @@ This repository has been designed with **next-generation security practices** in
 - **No API keys or tokens** - No external service credentials stored
 - **No personal information** - Configuration templates use placeholders only
 - **Secure defaults** - All configurations follow security best practices
-- **🆕 Container isolation** - Development environments are isolated in secure containers
+- **🆕 Dynamic configuration** - Template-based configuration generation with sanitized variables
+- **🆕 Clean architecture** - Removed redundancies and standardized security practices
 - **🆕 Structured audit logging** - JSON-based security event tracking with correlation IDs
 - **🆕 Performance monitoring** - Security-focused deployment monitoring without exposure
-- **🆕 Development security** - DevContainers follow security best practices
+- **🆕 Template security** - All template variables are validated and sanitized
 
 ### 🚫 What's NOT in This Repository
 
@@ -59,51 +60,43 @@ development:
 
 Then manually configure keys after installation.
 
-## 🐳 **NEW: Container Security**
+## 🔧 **NEW: Dynamic Configuration Security**
 
-### Development Container Security
+### Template-Based Configuration Security
 
-The project implements **container-first security** for safe development:
+The project implements **secure dynamic configuration** for safe template processing:
 
 ```bash
-# DevContainer security features
-.devcontainer/
-├── devcontainer.json    # Secure container configuration
-├── Dockerfile           # Hardened development image
-└── scripts/
-    ├── post-create.sh   # Secure environment setup
-    └── post-start.sh    # Security validation
+# Dynamic configuration security features
+configs/ansible/templates/
+├── group_vars.yml.j2    # Sanitized variable templates
+├── host_vars.yml.j2     # Secure host configuration templates
+└── inventory.yml.j2     # Validated inventory templates
+
+scripts/utils/
+└── config_generator.sh  # Secure configuration generator
 ```
 
-#### Container Security Features
+#### Configuration Security Features
 
-- **🔒 Isolated Environments**: Complete isolation from host system
-- **🛡️ Limited Privileges**: Containers run with minimal required permissions
-- **📊 Security Monitoring**: Built-in security monitoring and logging
-- **🔐 Secret Management**: Secure handling of development secrets
-- **🚫 Network Isolation**: Controlled network access with security profiles
+- **🔒 Variable Sanitization**: All template variables are validated and sanitized
+- **🛡️ Template Validation**: Jinja2 templates are validated before processing
+- **📊 Security Logging**: Configuration generation is logged for audit trails
+- **🔐 Secret Isolation**: Sensitive variables are handled separately
+- **🚫 Injection Prevention**: Protection against template injection attacks
 
-#### Docker Compose Security
+#### Configuration Generator Security
 
-```yaml
-# Security-focused service configuration
-services:
-  dev:
-    # Security constraints
-    cap_drop: [ALL]
-    cap_add: [SYS_PTRACE] # Only for debugging
-    security_opt:
-      - no-new-privileges:true
-      - seccomp:unconfined
+```bash
+# Security-focused configuration generation
+./scripts/utils/config_generator.sh
+# Features:
+# - Variable validation and sanitization
+# - Template syntax validation
+# - Output file validation
+# - Secure variable substitution
+# - Audit logging of all operations
 
-    # Resource limits
-    mem_limit: 2g
-    cpus: 2.0
-
-    # Read-only mounts where possible
-    volumes:
-      - .:/workspace:cached
-      - ~/.ssh:/home/developer/.ssh:ro
 ```
 
 ### Structured Security Logging
@@ -177,11 +170,11 @@ If you discover a security vulnerability:
 
 ### 🆕 Development Security Practices
 
-#### Container Development Security
+#### Direct Development Security
 
-- ✅ **Use DevContainers**: Develop in isolated, secure container environments
-- ✅ **Validate Dependencies**: All development dependencies are security-scanned
-- ✅ **Monitor Performance**: Use built-in monitoring to detect anomalies
+- ✅ **Template Validation**: Always validate configuration templates before deployment
+- ✅ **Variable Sanitization**: All template variables are automatically sanitized
+- ✅ **Configuration Testing**: Test configuration generation with --dry-run mode
 - ✅ **Structured Logging**: Enable correlation tracking for security events
 - ✅ **Secret Management**: Never commit secrets, use environment variables
 
@@ -189,14 +182,10 @@ If you discover a security vulnerability:
 
 ```bash
 # Security-focused development commands
-dev-security-scan      # Run security scan on development environment
-dev-audit-logs        # Review structured security logs
-dev-validate-config   # Validate configuration security
-dev-monitor-performance # Monitor for security-relevant performance issues
-
-# Container security validation
-docker compose exec dev security-check
-docker compose logs dev | grep "security"
+./scripts/utils/config_generator.sh --config deploy-config/deploy.conf --dry-run  # Validate configuration security
+./scripts/deploy.sh full --dry-run                                        # Test deployment security
+ansible-lint configs/ansible/                                             # Validate Ansible security
+shellcheck scripts/**/*.sh                                                # Check script security
 ```
 
 ### Configuration Security

@@ -5,18 +5,20 @@
 ## ✨ Project Overview
 
 This project has been **dramatically refactored** for simplicity while maintaining enterprise capabilities:
-- **Streamlined Architecture**: Removed 12 deprecated scripts for cleaner codebase
+
+- **Dynamic Configuration System**: Ansible configs generated automatically from deploy.conf
+- **Clean Architecture**: Removed redundancies and standardized all configurations
+- **Template-Based System**: Jinja2 templates for flexible configuration management
 - **Unified Interface**: Multiple confusing entry points → 1 clear deployment command (`deploy.sh`)
 - **Advanced Hybrid Password Management** with 4 secure methods
 - **GitHub CI/CD Integration** for enterprise deployment
 - **Comprehensive Security Framework** with enterprise-grade hardening
 - **Complete Power Management** for laptop optimization
-- **Enhanced Configuration System** with 100+ options
 
 ## 📁 Complete Directory Structure
 
 ```
-lm_archlinux_desktop/
+lm-archlinux-desktop/
 ├── 📄 README.md                     # Revolutionary project overview
 ├── 📄 LICENSE                       # MIT license
 ├── 📄 .gitignore                    # Version control exclusions
@@ -37,22 +39,23 @@ lm_archlinux_desktop/
 │   └── 📂 plans/
 │       └── 📄 implementation-plan.md # Project completion status
 │
-├── 📂 config/                       # 🎯 Centralized Configuration
+├── 📄 bootstrap.conf                # Bootstrap deployment configuration
+│
+├── 📂 deploy-config/                # 🎯 Centralized Configuration
 │   ├── 📄 deploy.conf               # Main deployment configuration (ALL SETTINGS)
 │   └── 📄 example.deploy.conf       # Example configuration with mock data
 │
-├── 📂 configs/                      # 🔧 Legacy Configuration Management
+├── 📂 configs/                      # 🔧 Dynamic Configuration Management
 │   └── 📂 ansible/                  # Ansible automation framework
 │       ├── 📄 ansible.cfg           # Ansible configuration
 │       ├── 📄 requirements.yml      # External role dependencies
-│       ├── 📂 inventory/            # Host inventory definitions
-│       │   └── 📄 localhost.yml     # Local deployment inventory
-│       ├── 📂 group_vars/           # Global variable definitions
-│       │   └── 📂 all/
-│       │       └── 📄 vars.yml      # System-wide variables
-│       ├── 📂 host_vars/            # Host-specific variables
-│       │   └── 📂 phoenix/
-│       │       └── 📄 vars.yml      # Phoenix host variables
+│       ├── 📂 templates/            # 🆕 Dynamic Configuration Templates
+│       │   ├── 📄 group_vars.yml.j2 # Group variables template
+│       │   ├── 📄 host_vars.yml.j2  # Host variables template
+│       │   └── 📄 inventory.yml.j2  # Inventory template
+│       ├── 📂 inventory/            # Generated host inventory definitions
+│       ├── 📂 group_vars/           # Generated global variable definitions
+│       ├── 📂 host_vars/            # Generated host-specific variables
 │       ├── 📂 playbooks/            # 🎭 Deployment Playbooks
 │       │   ├── 📄 site.yml          # Master orchestration playbook
 │       │   ├── 📄 bootstrap.yml     # Initial system setup
@@ -124,6 +127,7 @@ lm_archlinux_desktop/
 │   │                                #     - Consistent CLI interface across all operations
 │   │
 │   ├── 📂 utils/                    # 🔧 Single-Purpose Utilities
+│   │   ├── 📄 config_generator.sh   # 🆕 Dynamic Ansible configuration generator
 │   │   ├── 📄 passwords.sh          # Password management (consolidated 4 scripts)
 │   │   ├── 📄 network.sh            # Network configuration and testing
 │   │   ├── 📄 hardware.sh           # Hardware detection and validation
@@ -150,11 +154,12 @@ lm_archlinux_desktop/
 │   ├── 📂 security/                 # 🔒 Security Scripts (legacy)
 │   └── 📂 utilities/                # 🛠️ Utility Scripts (legacy)
 │
-├── 📂 config/                       # ⚙️ Enhanced Configuration System
-│   └── 📄 deploy.conf               # Unified configuration (100+ options)
+├── 📂 deploy-config/                # ⚙️ Dynamic Configuration System
+│   └── 📄 deploy.conf               # Single source of truth (100+ options)
 │                                    #     - User configuration with recommendations
 │                                    #     - System, network, security settings
 │                                    #     - Performance tuning parameters
+│                                    #     - Template variables for dynamic generation
 │
 ├── 📂 usb-deployment/               # 📱 Revolutionary USB Deployment System
 │   ├── 📄 README.md                 # USB deployment guide
@@ -172,22 +177,8 @@ lm_archlinux_desktop/
 │   ├── 📄 hardware_checker.sh       # Hardware compatibility validation
 │   └── 📄 backup_manager.sh         # Backup and restore system
 │
-├── 📂 templates/                    # 📝 Jinja2 Configuration Templates
-│   ├── 📂 systemd/                 # SystemD service templates
-│   │   ├── 📄 hyprland.service.j2   # Hyprland service configuration
-│   │   ├── 📄 power-management.service.j2 # Power management service
-│   │   └── 📄 maintenance.timer.j2  # Maintenance timer configuration
-│   ├── 📂 network/                 # Network configuration templates
-│   │   ├── 📄 wpa_supplicant.conf.j2 # WiFi configuration
-│   │   └── 📄 dhcpcd.conf.j2        # DHCP client configuration
-│   ├── 📂 security/                # Security configuration templates
-│   │   ├── 📄 ufw.rules.j2          # UFW firewall rules
-│   │   ├── 📄 fail2ban.local.j2     # Fail2ban configuration
-│   │   └── 📄 audit.rules.j2        # Audit system rules
-│   └── 📂 desktop/                 # Desktop environment templates
-│       ├── 📄 hyprland.conf.j2      # Main Hyprland configuration
-│       ├── 📄 waybar-config.j2      # Waybar status bar configuration
-│       └── 📄 autostart.j2          # Application autostart
+# Note: Templates are now located within each Ansible role's templates/ directory
+# Dynamic Ansible configuration templates are in configs/ansible/templates/
 │
 ├── 📂 files/                        # 📄 Static Files and Assets
 │   ├── 📂 wallpapers/              # Desktop wallpapers
@@ -226,7 +217,7 @@ lm_archlinux_desktop/
 │       ├── 📄 multi-user.sh         # Multi-user deployment
 │       └── 📄 enterprise.sh         # Enterprise deployment
 │
-└── 📂 profiles/                     # 📋 Deployment Profiles
+└── 📂 configs/profiles/             # 📋 Profile-Specific Configurations
     ├── 📂 work/                     # Work environment profile
     │   ├── 📄 archinstall.json      # Work-specific archinstall config
     │   ├── 📄 ansible-vars.yml      # Work environment variables
@@ -244,24 +235,30 @@ lm_archlinux_desktop/
 ## 🎯 Key Components Overview
 
 ### 🚀 Revolutionary Deployment System
+
+- **Dynamic Configuration**: Ansible configs generated automatically from deploy.conf
+- **Template-Based Generation**: Jinja2 templates for flexible configuration management
 - **USB Deployment**: Edit config on main PC, deploy with zero typing errors
 - **Zero-Touch Installation**: Answer 3 questions, get complete desktop
 - **Advanced Password Management**: 4 secure methods with encryption
 - **Enterprise CI/CD**: GitHub Actions integration
 
 ### 🛡️ Security Framework
+
 - **Multi-layered Security**: Firewall, fail2ban, audit logging
 - **Password Encryption**: AES-256 with PBKDF2 key derivation
 - **System Hardening**: Kernel parameters, file permissions
 - **Access Control**: SSH hardening, sudo configuration
 
 ### ⚡ Performance & Power Management
+
 - **TLP Integration**: Advanced laptop power management
 - **Intel GPU Optimization**: Hardware-specific tuning
 - **Thermal Management**: Temperature monitoring and control
 - **CPU Scaling**: Performance and efficiency balance
 
 ### 🔧 System Tools & Utilities
+
 - **Hardware Validation**: Compatibility checking and reporting
 - **Backup Management**: Complete system backup with verification
 - **Package Management**: Unified pacman/AUR interface
@@ -270,12 +267,14 @@ lm_archlinux_desktop/
 ## 📚 Documentation Structure
 
 ### Core Documentation
+
 - **installation-guide.md**: Complete deployment methods including USB system
 - **password-management.md**: Advanced password system documentation
 - **github-password-storage.md**: Enterprise CI/CD setup guide
 - **target-computer-deployment.md**: Target deployment workflows
 
 ### Technical Documentation
+
 - **project-structure.md**: Complete codebase overview (this file)
 - **virtualbox-testing-guide.md**: VM testing environment setup
 - **troubleshooting.md**: Common issues and solutions
@@ -283,18 +282,21 @@ lm_archlinux_desktop/
 ## 🔄 Workflow Integration
 
 ### Development Workflow
+
 1. **Development**: Edit code, test in VM
 2. **Validation**: Run testing scripts
 3. **Documentation**: Update relevant guides
 4. **Integration**: CI/CD pipeline validation
 
 ### Deployment Workflow
+
 1. **Preparation**: Choose deployment method (USB/Direct/CI-CD)
 2. **Configuration**: Set up passwords using preferred method
 3. **Deployment**: Execute deployment scripts
 4. **Validation**: Run post-installation tests
 
 ### Maintenance Workflow
+
 1. **Monitoring**: Regular system health checks
 2. **Updates**: Automated system and package updates
 3. **Backup**: Regular configuration and data backups
@@ -303,17 +305,19 @@ lm_archlinux_desktop/
 ## 🚀 Getting Started
 
 ### Quick Start Options
+
 1. **USB Deployment** (Recommended): Download `usb-deployment/` folder
 2. **Direct Installation**: Use `scripts/deploy.sh full`
 3. **Enterprise Setup**: Configure GitHub Secrets workflow
 4. **Traditional**: Clone repository and use Makefile
 
 ### Development Setup
+
 ```bash
-git clone https://github.com/LyeosMaouli/lm_archlinux_desktop.git
-cd lm_archlinux_desktop
+git clone https://github.com/LyeosMaouli/lm-archlinux-desktop.git
+cd lm-archlinux-desktop
 make dev-setup  # Install development tools
 make test      # Run validation tests
 ```
 
-This revolutionary project structure provides enterprise-grade automation with maximum flexibility and security for Arch Linux Hyprland deployments.
+**Result**: Complete, secure, modern Hyprland desktop with enterprise-grade automation.

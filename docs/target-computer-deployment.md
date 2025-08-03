@@ -64,25 +64,23 @@ jobs:
 1. Go to **Actions** tab in your GitHub repository
 2. Click **"Generate Password File"** workflow
 3. Click **"Run workflow"**
-4. Enter a **strong encryption passphrase** (remember this!)
-5. Download the generated `passwords.enc` file
+4. **Enter your email address** where you want to receive the encrypted file
+5. Enter a **strong encryption passphrase** (remember this!)
+6. Click **"Run workflow"** to start generation
+
+**📧 Email Delivery Features:**
+- **Beautiful HTML Email**: Professional formatting with Terragon Labs branding
+- **Secure Delivery**: Encrypted file sent directly to your email (no public access)
+- **Complete Instructions**: Step-by-step deployment guide included in email
+- **Security Notes**: Important reminders about passphrase and file cleanup
 
 ### Step 3: Deploy on Target Computer
 
 1. **Boot target computer** from Arch Linux ISO
-2. **Transfer the encrypted file** to the target computer:
-
-```bash
-# Method A: Download from your repository releases
-curl -L -o passwords.enc "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/TAG/passwords.enc"
-
-# Method B: Use a USB stick to transfer the file
-# Copy passwords.enc to USB, then mount it on target computer
-
-# Method C: Upload to temporary file sharing (less secure)
-# Upload to pastebin, transfer.sh, etc. and download
-```
-
+2. **Check your email** for the encrypted password file:
+   - You'll receive a professionally formatted HTML email
+   - The email includes the `passwords.enc` file as an attachment
+   - Save the attachment to your target computer
 3. **Run deployment** with encrypted file:
 
 ```bash

@@ -1,7 +1,7 @@
 {
     "!users": [
         {
-            "username": "{{USERNAME}}",
+            "username": "lyeosmaouli",
             "!password": null,
             "sudo": true
         }
@@ -17,9 +17,10 @@
         "config_type": "manual_partitioning",
         "device_modifications": []
     },
-    "hostname": "phoenix-personal",
+    "hostname": "phoenix",
     "kernels": [
-        "linux"
+        "linux",
+        "linux-lts"
     ],
     "locale_config": {
         "kb_layout": "fr",
@@ -30,7 +31,8 @@
         "custom_mirrors": [],
         "mirror_regions": {
             "Worldwide": [
-                "https://mirror.rackspace.com/archlinux/$repo/os/$arch"
+                "https://mirror.rackspace.com/archlinux/$repo/os/$arch",
+                "https://mirror.leaseweb.net/archlinux/$repo/os/$arch"
             ]
         }
     },
@@ -49,9 +51,9 @@
         "sudo",
         "neovim",
         "htop",
-        "firefox",
-        "discord",
-        "steam"
+        "curl",
+        "wget",
+        "tmux"
     ],
     "parallel downloads": 5,
     "profile_config": null,

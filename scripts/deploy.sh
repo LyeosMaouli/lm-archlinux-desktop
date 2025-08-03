@@ -61,7 +61,7 @@ if [[ "${COMMON_LOADED:-}" != "true" ]]; then
     
     # Basic logging functions as fallback
     if [[ -z "${LOG_DIR:-}" ]]; then
-        LOG_DIR="$(pwd)/logs"
+        LOG_DIR="/var/log"
     fi
     mkdir -p "$LOG_DIR"
     if [[ -z "${LOG_FILE:-}" ]]; then
@@ -600,6 +600,14 @@ EOF
 #
 
 load_configuration() {
+    # Save command-line values before loading config file
+    local cli_hostname="$HOSTNAME"
+    local cli_user_name="$USER_NAME"
+    local cli_profile="$PROFILE"
+    local cli_password_mode="$PASSWORD_MODE"
+    local cli_network_mode="$NETWORK_MODE"
+    local cli_encryption="$ENCRYPTION_ENABLED"
+    
     # Load from config file if it exists
     if [[ -n "${CONFIG_FILE:-}" ]]; then
         if ! load_config "$CONFIG_FILE"; then
@@ -610,9 +618,9 @@ load_configuration() {
         # Try multiple paths for default config file
         local config_paths=(
             "$CONFIG_DIR/deploy.conf"                    # Standard project structure
-            "$PROJECT_ROOT/config/deploy.conf"           # Alternative path
-            "$SCRIPT_DIR/../config/deploy.conf"          # When in scripts directory
-            "$SCRIPT_DIR/../../config/deploy.conf"       # When in scripts/internal
+            "$PROJECT_ROOT/deploy-config/deploy.conf"    # Alternative path
+            "$SCRIPT_DIR/../deploy-config/deploy.conf"   # When in scripts directory
+            "$SCRIPT_DIR/../../deploy-config/deploy.conf" # When in scripts/internal
         )
         
         local config_loaded=false
@@ -632,15 +640,73 @@ load_configuration() {
         fi
     fi
     
-    # Override with any values from config (using get_config function if available)
-    if command -v get_config >/dev/null 2>&1; then
-        PROFILE="${PROFILE:-$(get_config "PROFILE" "$DEFAULT_PROFILE")}"
-        PASSWORD_MODE="${PASSWORD_MODE:-$(get_config "PASSWORD_MODE" "$DEFAULT_PASSWORD_MODE")}"
-        NETWORK_MODE="${NETWORK_MODE:-$(get_config "NETWORK_MODE" "$DEFAULT_NETWORK_MODE")}"
-        HOSTNAME="${HOSTNAME:-$(get_config "HOSTNAME" "$DEFAULT_HOSTNAME")}"
-        USER_NAME="${USER_NAME:-$(get_config "USER_NAME" "$DEFAULT_USER")}"
-        ENCRYPTION_ENABLED="${ENCRYPTION_ENABLED:-$(get_config "ENCRYPTION_ENABLED" "$DEFAULT_ENCRYPTION")}"
+    # Restore command-line values (command-line takes precedence over config file)
+    [[ "$cli_hostname" != "$DEFAULT_HOSTNAME" ]] && HOSTNAME="$cli_hostname"
+    [[ "$cli_user_name" != "$DEFAULT_USER" ]] && USER_NAME="$cli_user_name"
+    [[ "$cli_profile" != "$DEFAULT_PROFILE" ]] && PROFILE="$cli_profile"
+    [[ "$cli_password_mode" != "$DEFAULT_PASSWORD_MODE" ]] && PASSWORD_MODE="$cli_password_mode"
+    [[ "$cli_network_mode" != "$DEFAULT_NETWORK_MODE" ]] && NETWORK_MODE="$cli_network_mode"
+    [[ "$cli_encryption" != "$DEFAULT_ENCRYPTION" ]] && ENCRYPTION_ENABLED="$cli_encryption"
+    
+    # Use defaults for any values not set by command-line or config file
+    PROFILE="${PROFILE:-$DEFAULT_PROFILE}"
+    PASSWORD_MODE="${PASSWORD_MODE:-$DEFAULT_PASSWORD_MODE}"
+    NETWORK_MODE="${NETWORK_MODE:-$DEFAULT_NETWORK_MODE}"
+    HOSTNAME="${HOSTNAME:-$DEFAULT_HOSTNAME}"
+    USER_NAME="${USER_NAME:-$DEFAULT_USER}"
+    ENCRYPTION_ENABLED="${ENCRYPTION_ENABLED:-$DEFAULT_ENCRYPTION}"
+}
+
+# Generate dynamic Ansible configuration files from deploy.conf
+generate_ansible_configs() {
+    log_info "Generating dynamic Ansible configuration files..."
+    
+    # Path to config generator script
+    local config_generator="$SCRIPT_DIR/utils/config_generator.sh"
+    
+    # Check if config generator exists
+    if [[ ! -f "$config_generator" ]]; then
+        log_error "Config generator script not found: $config_generator"
+        return $EXIT_CONFIG_ERROR
     fi
+    
+    # Export current configuration as environment variables 
+    # so config generator can use command-line values instead of placeholders
+    export USER_NAME HOSTNAME PROFILE ENCRYPTION_ENABLED NETWORK_MODE
+    export PASSWORD_MODE DRY_RUN
+    
+    # Prepare config generator arguments
+    local generator_args=()
+    
+    # Add config file if specified
+    if [[ -n "${CONFIG_FILE:-}" ]]; then
+        generator_args+=("--config" "$CONFIG_FILE")
+    fi
+    
+    # Add profile if specified
+    if [[ -n "${PROFILE:-}" ]]; then
+        generator_args+=("--profile" "$PROFILE")
+    fi
+    
+    # Add verbose flag if debug logging is enabled
+    if [[ $LOG_LEVEL -ge $LOG_DEBUG ]]; then
+        generator_args+=("--verbose")
+    fi
+    
+    # Add dry-run flag if dry-run mode is enabled
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        generator_args+=("--dry-run")
+    fi
+    
+    log_debug "Calling config generator with args: ${generator_args[*]}"
+    
+    # Execute config generator
+    if ! "$config_generator" "${generator_args[@]}"; then
+        log_error "Failed to generate Ansible configuration files"
+        return $EXIT_CONFIG_ERROR
+    fi
+    
+    log_success "Ansible configuration files generated successfully"
 }
 
 # Auto-detect .enc files and update configuration
@@ -716,6 +782,12 @@ parse_arguments() {
             exit "${EXIT_INVALID_ARGS:-1}"
             ;;
     esac
+    
+    # Special handling for help command - ignore extra arguments
+    if [[ "$COMMAND" == "help" ]]; then
+        show_detailed_help
+        exit "${EXIT_SUCCESS:-0}"
+    fi
     
     # Parse options
     while [[ $# -gt 0 ]]; do
@@ -891,10 +963,11 @@ validate_arguments() {
         fi
     fi
     
-    # Validate hostname
-    if [[ ! "$HOSTNAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}[a-zA-Z0-9]?$ ]]; then
+    # Validate hostname (1-63 characters, alphanumeric and hyphens, cannot start/end with hyphen)
+    if [[ ! "$HOSTNAME" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]]; then
         log_error "Invalid hostname: $HOSTNAME"
-        log_error "Hostname must contain only letters, numbers, and hyphens"
+        log_error "Hostname must be 1-63 characters, contain only letters, numbers, and hyphens"
+        log_error "Hostname cannot start or end with a hyphen"
         exit $EXIT_INVALID_ARGS
     fi
     
@@ -988,6 +1061,100 @@ check_dependencies() {
 # Deployment Functions
 #
 
+generate_deployment_config() {
+    local config_file="/tmp/deployment_config.yml"
+    log_debug "Generating deployment configuration file: $config_file"
+    
+    # Get passwords from password management system
+    local root_password=""
+    local user_password=""
+    local encryption_passphrase=""
+    
+    if [[ "${PASSWORD_MODE:-}" == "file" ]] && [[ -n "${PASSWORD_FILE:-}" ]]; then
+        # Try to read passwords from encrypted file
+        if [[ -f "${PASSWORD_FILE}" ]]; then
+            log_debug "Reading passwords from file: ${PASSWORD_FILE}"
+            # Load password utilities to decrypt the file
+            source "$SCRIPT_DIR/utils/passwords.sh" || {
+                log_error "Cannot load password utilities"
+                return $EXIT_DEPENDENCY_ERROR
+            }
+            
+            # Load passwords from encrypted file
+            export PASSWORD_FILE="${PASSWORD_FILE}"
+            if load_file_passwords; then
+                root_password=$(get_password "root" 2>/dev/null || echo "")
+                user_password=$(get_password "user" 2>/dev/null || echo "")
+                encryption_passphrase=$(get_password "luks" 2>/dev/null || echo "")
+            else
+                log_error "Failed to load passwords from file: ${PASSWORD_FILE}"
+                return $EXIT_CONFIG_ERROR
+            fi
+        else
+            log_error "Password file not found: ${PASSWORD_FILE}"
+            return $EXIT_CONFIG_ERROR
+        fi
+    elif [[ "${PASSWORD_MODE:-}" == "env" ]]; then
+        root_password="${DEPLOY_ROOT_PASSWORD:-}"
+        user_password="${DEPLOY_USER_PASSWORD:-}"
+        encryption_passphrase="${DEPLOY_LUKS_PASSPHRASE:-}"
+    elif [[ "${PASSWORD_MODE:-}" == "generate" ]]; then
+        # Generate secure passwords
+        source "$SCRIPT_DIR/utils/passwords.sh" || {
+            log_error "Cannot load password utilities"
+            return $EXIT_DEPENDENCY_ERROR
+        }
+        root_password=$(generate_secure_password)
+        user_password=$(generate_secure_password)
+        encryption_passphrase=$(generate_secure_password)
+        
+        # Save generated passwords for user reference
+        log_info "Generated passwords saved to: $LOG_DIR/generated_passwords.txt"
+        {
+            echo "Generated passwords for deployment:"
+            echo "Root password: $root_password"
+            echo "User password: $user_password"
+            echo "Encryption passphrase: $encryption_passphrase"
+        } > "$LOG_DIR/generated_passwords.txt"
+        chmod 600 "$LOG_DIR/generated_passwords.txt"
+    fi
+    
+    # Generate YAML configuration file
+    cat > "$config_file" << EOF
+# Deployment configuration generated by deploy.sh
+system:
+  hostname: "${HOSTNAME:-arch-desktop}"
+  timezone: "UTC"
+  locale: "en_US.UTF-8"
+  keymap: "us"
+
+user:
+  username: "${USER_NAME:-user}"
+  password: "${user_password}"
+
+root:
+  password: "${root_password}"
+
+disk:
+  device: ""  # Auto-detect
+  efi_size: "128M"
+  encryption:
+    enabled: ${ENCRYPTION_ENABLED:-false}
+    passphrase: "${encryption_passphrase}"
+
+network:
+  enabled: false
+  ssid: ""
+  password: ""
+
+automation:
+  auto_reboot: false
+EOF
+    
+    log_debug "Generated deployment configuration file"
+    return 0
+}
+
 execute_install_phase() {
     log_info "Starting base system installation..."
     
@@ -1000,30 +1167,16 @@ execute_install_phase() {
         return 0
     fi
     
-    # Call installation utility with our configuration
-    local install_args=(
-        "--hostname" "$HOSTNAME"
-        "--user" "$USER_NAME"
-        "--profile" "$PROFILE"
-    )
-    
-    if [[ "${ENCRYPTION_ENABLED:-}" == "true" ]]; then
-        install_args+=("--encryption")
+    # Generate configuration file for auto_install.sh
+    if ! generate_deployment_config; then
+        log_error "Failed to generate deployment configuration"
+        return $EXIT_CONFIG_ERROR
     fi
     
-    if [[ "${PASSWORD_MODE:-}" != "interactive" ]]; then
-        install_args+=("--password-mode" "$PASSWORD_MODE")
-    fi
+    log_debug "Calling installation with config file: /tmp/deployment_config.yml"
     
-    if [[ -n "${PASSWORD_FILE:-}" ]]; then
-        install_args+=("--password-file" "$PASSWORD_FILE")
-    fi
-    
-    log_debug "Calling installation with args: ${install_args[*]}"
-    
-    # For now, call the existing auto_install.sh with translated arguments
-    # TODO: Replace with native implementation
-    if ! "$SCRIPT_DIR/deployment/auto_install.sh" "${install_args[@]}"; then
+    # Call auto_install.sh without arguments (it reads from config file)
+    if ! "$SCRIPT_DIR/deployment/auto_install.sh"; then
         log_error "Base system installation failed"
         return $EXIT_INSTALL_ERROR
     fi
@@ -1158,6 +1311,9 @@ main() {
     parse_arguments "$@"
     load_configuration
     
+    # Generate dynamic Ansible configuration files
+    generate_ansible_configs
+    
     # Auto-detect .enc files and update configuration if needed
     auto_detect_enc_files
     
@@ -1191,7 +1347,16 @@ ${BOLD}Mode:${NC}         ${YELLOW}DRY RUN (preview only)${NC}" || echo "")"
     
     # Pre-flight checks
     check_system_requirements
-    check_dependencies
+    
+    # Check dependencies with fallback handling
+    if ! check_dependencies; then
+        if [[ "${FALLBACK_TO_DIRECT_INSTALL:-}" == "true" ]]; then
+            log_warn "Ansible unavailable due to space constraints - using direct installation method"
+        else
+            log_error "Dependency check failed - cannot proceed"
+            exit 12
+        fi
+    fi
     
     # Execute requested command
     case ${COMMAND:-} in

@@ -8,10 +8,26 @@ set -euo pipefail
 if [[ -z "${SCRIPT_DIR:-}" ]]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
-source "$SCRIPT_DIR/../internal/common.sh" || {
-    echo "Error: Cannot load common.sh"
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is deployment/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
     exit 1
-}
+fi
 
 # Configuration file path
 CONFIG_FILE="${CONFIG_FILE:-/tmp/deployment_config.yml}"
@@ -313,10 +329,14 @@ setup_partitions() {
     local efi_size=$(parse_nested_config "disk" "efi_size")
     
     if [[ -z "${efi_size:-}" ]]; then
-        efi_size="512M"
+        efi_size="128M"  # Minimal EFI size to maximize root partition space
     fi
     
     info "Setting up partitions on $disk_device..."
+    
+    # Show current disk state before partitioning
+    info "Current disk state before partitioning:"
+    lsblk "$disk_device" 2>/dev/null || warn "Could not show current disk state"
     
     # Verify device exists and is accessible with detailed debugging
     info "Verifying disk device access: $disk_device"
@@ -344,16 +364,28 @@ setup_partitions() {
     # Close any existing LUKS mappings
     cryptsetup close cryptroot 2>/dev/null || true
     
-    # Create partition table
+    # Create partition table with error handling
     info "Creating GPT partition table..."
-    parted "$disk_device" --script mklabel gpt
+    if ! parted "$disk_device" --script mklabel gpt; then
+        error "Failed to create GPT partition table on $disk_device"
+    fi
     
     info "Creating EFI partition (${efi_size})..."
-    parted "$disk_device" --script mkpart ESP fat32 1MiB "${efi_size}"
-    parted "$disk_device" --script set 1 esp on
+    if ! parted "$disk_device" --script mkpart ESP fat32 1MiB "${efi_size}"; then
+        error "Failed to create EFI partition"
+    fi
+    if ! parted "$disk_device" --script set 1 esp on; then
+        error "Failed to set ESP flag on EFI partition"
+    fi
     
-    info "Creating root partition..."
-    parted "$disk_device" --script mkpart primary ext4 "${efi_size}" 100%
+    info "Creating root partition (using remaining space)..."
+    if ! parted "$disk_device" --script mkpart primary ext4 "${efi_size}" 100%; then
+        error "Failed to create root partition"
+    fi
+    
+    # Show partition table after creation
+    info "Partition table created:"
+    parted "$disk_device" --script print 2>/dev/null || warn "Could not display partition table"
     
     # Wait for partition creation and ensure system recognizes them
     info "Waiting for partition table to be recognized..."
@@ -379,38 +411,98 @@ setup_partitions() {
     info "  EFI: $EFI_PARTITION"
     info "  Root: $ROOT_PARTITION"
     
-    # Verify partitions exist with retry logic
+    # Analyze partition sizes for optimization
+    info "Analyzing partition layout for space optimization..."
+    local disk_size_bytes=$(lsblk -b -n -d -o SIZE "$disk_device" 2>/dev/null || echo "0")
+    local disk_size_gb=$((disk_size_bytes / 1024 / 1024 / 1024))
+    local efi_size_mb=$(echo "$efi_size" | sed 's/M$//' | sed 's/G$/000/')
+    local expected_root_gb=$(( disk_size_gb - (efi_size_mb / 1024) ))
+    
+    info "Disk analysis:"
+    info "  Total disk: ${disk_size_gb}GB"
+    info "  EFI allocation: ${efi_size} (${efi_size_mb}MB)"
+    info "  Expected root: ~${expected_root_gb}GB"
+    
+    if [[ $disk_size_gb -lt 10 ]]; then
+        warn "Very small disk detected (${disk_size_gb}GB). Installation may be challenging."
+    fi
+    
+    # Verify partitions exist with comprehensive retry logic
     info "Verifying partition creation..."
-    local max_retries=10
+    local max_retries=15
     local retry_count=0
     
     while [[ $retry_count -lt $max_retries ]]; do
         if [[ -b "$EFI_PARTITION" ]] && [[ -b "$ROOT_PARTITION" ]]; then
             info "[OK] All partitions created successfully"
+            
+            # Verify partition sizes are reasonable
+            local efi_size_actual=$(lsblk -b -n -o SIZE "$EFI_PARTITION" 2>/dev/null | numfmt --to=iec)
+            local root_size_actual=$(lsblk -b -n -o SIZE "$ROOT_PARTITION" 2>/dev/null | numfmt --to=iec)
+            
+            info "Partition sizes verified:"
+            info "  EFI partition ($EFI_PARTITION): $efi_size_actual"
+            info "  Root partition ($ROOT_PARTITION): $root_size_actual"
+            
+            # Check if root partition is reasonably sized (at least 5GB)
+            local root_size_gb=$(lsblk -b -n -o SIZE "$ROOT_PARTITION" 2>/dev/null | awk '{print int($1/1024/1024/1024)}')
+            if [[ $root_size_gb -lt 5 ]]; then
+                error "Root partition too small: ${root_size_gb}GB < 5GB minimum required"
+            fi
+            
             break
         fi
         
         retry_count=$((retry_count + 1))
         warn "Partition verification attempt $retry_count/$max_retries - waiting for devices..."
-        sleep 1
         
-        # Show what devices we can see
-        info "Available block devices:"
-        ls -la /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null || echo "No devices found"
+        # Force device recognition
+        partprobe "$disk_device" 2>/dev/null || true
+        udevadm settle 2>/dev/null || true
+        sleep 2
+        
+        # Show debugging info
+        info "Current partition status:"
+        lsblk "$disk_device" 2>/dev/null || warn "Cannot show disk state"
+        
+        info "Expected partitions:"
+        info "  EFI: $EFI_PARTITION (exists: $([[ -b "$EFI_PARTITION" ]] && echo "YES" || echo "NO"))"
+        info "  Root: $ROOT_PARTITION (exists: $([[ -b "$ROOT_PARTITION" ]] && echo "YES" || echo "NO"))"
     done
     
-    # Final verification
-    if [[ ! -b "$EFI_PARTITION" ]]; then
-        error "EFI partition $EFI_PARTITION was not created after $max_retries attempts"
-    fi
-    
-    if [[ ! -b "$ROOT_PARTITION" ]]; then
-        error "Root partition $ROOT_PARTITION was not created after $max_retries attempts"
+    # Final verification with recovery attempt
+    if [[ ! -b "$EFI_PARTITION" ]] || [[ ! -b "$ROOT_PARTITION" ]]; then
+        error "Partition creation failed after $max_retries attempts"
+        error "Final state:"
+        lsblk "$disk_device" 2>/dev/null || true
+        
+        # Last-ditch recovery attempt
+        warn "Attempting emergency partition recovery..."
+        parted "$disk_device" --script mklabel gpt
+        parted "$disk_device" --script mkpart ESP fat32 1MiB 128MiB
+        parted "$disk_device" --script set 1 esp on  
+        parted "$disk_device" --script mkpart primary ext4 128MiB 100%
+        
+        # Wait and check again
+        sleep 5
+        partprobe "$disk_device" 2>/dev/null || true
+        udevadm settle 2>/dev/null || true
+        
+        if [[ ! -b "$EFI_PARTITION" ]] || [[ ! -b "$ROOT_PARTITION" ]]; then
+            error "Emergency partition recovery also failed - hardware or system issue"
+        else
+            warn "Emergency partition recovery succeeded"
+        fi
     fi
     
     info "[OK] Partition verification successful:"
     info "  EFI: $EFI_PARTITION"
     info "  Root: $ROOT_PARTITION"
+    
+    # Show final partition layout for all system configurations
+    info "Final partition layout:"
+    lsblk "$disk_device" 2>/dev/null || warn "Cannot display final partition layout"
+    parted "$disk_device" --script print 2>/dev/null || warn "Cannot display partition table"
 }
 
 # Setup encryption
@@ -522,6 +614,15 @@ format_filesystems() {
     # Format root partition
     info "Formatting root partition: $ENCRYPTED_ROOT"
     mkfs.ext4 -F -v "$ENCRYPTED_ROOT" || error "Failed to format root partition"
+    
+    # Immediately expand the filesystem to use all available partition space
+    info "Expanding filesystem to use full partition space..."
+    if command -v resize2fs >/dev/null 2>&1; then
+        info "Expanding ext4 filesystem on: $ENCRYPTED_ROOT"
+        resize2fs "$ENCRYPTED_ROOT" 2>/dev/null || warn "Immediate filesystem expansion failed"
+    else
+        warn "resize2fs not available - filesystem may not use full partition space"
+    fi
     
     # Verify formatting
     info "Verifying filesystem creation..."
@@ -806,15 +907,115 @@ install_base_system() {
     # Add XferCommand in the [options] section
     sed -i '/^ParallelDownloads/a XferCommand = /usr/bin/curl -L -C - -f --retry 5 --retry-delay 3 --connect-timeout 60 -o %o %u' /etc/pacman.conf
     
+    # Clean package cache to free up space
+    info "Cleaning package cache to free up space..."
+    pacman -Scc --noconfirm || warn "Failed to clean package cache"
+    
+    # Comprehensive disk space analysis and expansion
+    info "Performing comprehensive disk space analysis..."
+    local available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
+    local available_space_mb=$((available_space_kb / 1024))
+    local available_space_gb=$((available_space_kb / 1024 / 1024))
+    info "Available space in /mnt: ${available_space_gb}GB (${available_space_mb}MB)"
+    
+    # Show detailed space breakdown with encryption info
+    info "Comprehensive disk space analysis:"
+    info "  Encryption enabled: ${ENCRYPTION_ENABLED:-false}"
+    info "  Root partition: ${ROOT_PARTITION:-unknown}"
+    info "  Encrypted root: ${ENCRYPTED_ROOT:-unknown}"
+    
+    info "Partition layout:"
+    lsblk
+    
+    info "Filesystem usage:"
+    df -h /mnt
+    
+    info "Encrypted devices (if any):"
+    ls -la /dev/mapper/ 2>/dev/null || info "No encrypted devices found"
+    
+    # Check if we need to expand the filesystem
+    if [[ $available_space_mb -lt 2048 ]]; then  # Less than 2GB available
+        warn "Low disk space detected (${available_space_mb}MB), attempting filesystem expansion..."
+        
+        # Universal device detection for all system configurations
+        local filesystem_device
+        local device_type
+        
+        # Priority order: encrypted device, then root partition, then auto-detect
+        if [[ "${ENCRYPTION_ENABLED:-}" == "true" ]] && [[ -n "${ENCRYPTED_ROOT:-}" ]] && [[ -b "${ENCRYPTED_ROOT:-}" ]]; then
+            filesystem_device="$ENCRYPTED_ROOT"
+            device_type="encrypted"
+            info "Using encrypted filesystem device: $filesystem_device"
+        elif [[ -n "${ROOT_PARTITION:-}" ]] && [[ -b "${ROOT_PARTITION:-}" ]]; then
+            filesystem_device="$ROOT_PARTITION"
+            device_type="unencrypted"
+            info "Using unencrypted filesystem device: $filesystem_device"
+        else
+            # Auto-detect mounted filesystem device
+            filesystem_device=$(df /mnt | tail -1 | awk '{print $1}')
+            device_type="auto-detected"
+            info "Auto-detected filesystem device: $filesystem_device"
+        fi
+        
+        info "Filesystem expansion config:"
+        info "  Device type: $device_type"
+        info "  Target device: $filesystem_device" 
+        info "  Encryption enabled: ${ENCRYPTION_ENABLED:-false}"
+        
+        # Try to expand the filesystem to use all available partition space
+        if command -v resize2fs >/dev/null 2>&1; then
+            info "Attempting to expand ext4 filesystem on: $filesystem_device"
+            
+            # Verify the device exists and is accessible
+            if [[ -b "$filesystem_device" ]]; then
+                info "Device $filesystem_device verified - proceeding with expansion"
+                resize2fs "$filesystem_device" 2>/dev/null || warn "Filesystem expansion failed"
+            else
+                warn "Cannot expand filesystem - device $filesystem_device not found or not accessible"
+                warn "Available devices:"
+                ls -la /dev/mapper/ 2>/dev/null || true
+                lsblk 2>/dev/null || true
+            fi
+            
+            # Recheck space after expansion
+            available_space_kb=$(df /mnt | tail -1 | awk '{print $4}')
+            available_space_mb=$((available_space_kb / 1024))
+            available_space_gb=$((available_space_kb / 1024 / 1024))
+            info "Space after expansion: ${available_space_gb}GB (${available_space_mb}MB)"
+        fi
+    fi
+    
+    # Final space check with more granular requirements
+    if [[ $available_space_mb -lt 1024 ]]; then  # Less than 1GB
+        error "Insufficient disk space for installation (${available_space_mb}MB < 1024MB required)"
+        error "This typically indicates partition layout issues. Consider:"
+        error "1. Increasing VM disk size beyond 60GB"
+        error "2. Reducing EFI partition size further"
+        error "3. Checking for partition alignment issues"
+        return 1
+    elif [[ $available_space_mb -lt 2048 ]]; then  # Less than 2GB
+        warn "Marginal disk space (${available_space_mb}MB). Installation may fail with large package sets."
+    fi
+    
     # Try pacstrap with better error handling and diagnostics
     info "Starting package installation with pacstrap..."
     echo "=== PACSTRAP INSTALLATION ATTEMPT ===" >> "$VERBOSE_LOG"
     echo "Target: /mnt" >> "$VERBOSE_LOG"
+    echo "Available space: ${available_space_gb}GB" >> "$VERBOSE_LOG"
     echo "Packages: base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode" >> "$VERBOSE_LOG"
     echo "Mirror list being used:" >> "$VERBOSE_LOG"
     cat /etc/pacman.d/mirrorlist >> "$VERBOSE_LOG" 2>&1
     echo "=== PACSTRAP OUTPUT ===" >> "$VERBOSE_LOG"
-    if ! timeout 1800 pacstrap -c /mnt base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode 2>&1 | tee -a "$VERBOSE_LOG"; then
+    # Use minimal package set for tight disk space scenarios
+    if [[ $available_space_mb -lt 1536 ]]; then  # Less than 1.5GB
+        minimal_packages="base linux networkmanager"
+        warn "Using minimal package set due to low disk space: $minimal_packages"
+        pacstrap_cmd="timeout 1800 pacstrap -c /mnt $minimal_packages"
+    else
+        pacstrap_cmd="timeout 1800 pacstrap -c /mnt base base-devel linux linux-firmware networkmanager sudo git openssh neovim intel-ucode"
+    fi
+    
+    if ! $pacstrap_cmd 2>&1 | tee -a "$VERBOSE_LOG"; then
         warn "Full package installation failed"
         
         # Show more diagnostic information

@@ -1,20 +1,20 @@
 ---
-# Work Profile Configuration
-# Security-focused laptop configuration for professional use
+# work Profile Configuration
+# Generated from deploy-config/deploy.conf - DO NOT EDIT MANUALLY
 
 profile_name: "work"
 profile_type: "WORK"
 
 # System Configuration
 system:
-  hostname: "phoenix-work"
-  timezone: "Europe/Paris"
+  hostname: "work-system"
+  timezone: "UTC"
   locale: "en_US.UTF-8"
-  keymap: "fr"
+  keymap: "us"
 
-# User Configuration
+# User Configuration  
 user:
-  username: "{{ user_username | default('user') }}"
+  username: "workuser"
   shell: "/bin/bash"
   groups:
     - wheel
@@ -26,86 +26,53 @@ user:
 # Desktop Configuration
 desktop:
   environment: "hyprland"
+  display_manager: "sddm"
   theme: "catppuccin-mocha"
-  auto_login: false  # Security: Manual login required
-  wallpaper: "corporate-dark"
+  auto_login: false
 
-# Package Configuration
-packages:
-  mirrors:
-    protocol: "https"
-    age: 12
-  aur:
-    helper: "yay"
-    packages:
-      - visual-studio-code-bin
-      - discord
-      - zoom
-      - slack-desktop
-      - teams
-      - firefox-developer-edition
-
-# Security Configuration (Enhanced for work)
+# Security Configuration
 security:
   firewall:
     enabled: true
     default_policy: "deny"
-    allow_ssh: true
   fail2ban:
     enabled: true
-    ssh_protection: true
-    aggressive_mode: true
   audit:
     enabled: true
-    rules: "strict"
   ssh:
     port: 22
     password_auth: false
     root_login: false
     key_types: ["ed25519"]
 
-# Power Management (Laptop optimized)
-power_management:
-  enabled: true
-  tlp_enabled: true
-  cpu_governor_ac: "performance"
-  cpu_governor_battery: "powersave"
-  wifi_powersave: true
-  usb_autosuspend: true
-
-# Development Tools
+# Development Configuration
 development:
   git:
-    username: "Lyeos Maouli"
-    email: "lyeos.maouli@company.com"
+    username: "Work User"
+    email: "user@company.com"
   ssh_keys:
     generate: true
     type: "ed25519"
-  tools:
-    - neovim
-    - tmux
-    - htop
-    - tree
-    - docker
-    - kubectl
+  tools_enabled: true
 
-# Work-specific applications
-work_apps:
-  productivity:
-    - libreoffice-fresh
-    - thunderbird
-    - keepassxc
-  security:
-    - gnupg
-    - yubikey-manager
-  communication:
-    - zoom
-    - teams
-    - slack-desktop
+# Hardware Configuration
+hardware:
+  bootloader: "systemd-boot"
+  filesystem: "ext4"
+  encryption: true
+  bluetooth: true
+  printing: true
+
+# Package Configuration
+packages:
+  aur_enabled: true
+  custom_packages: ""
+  parallel_downloads: 5
 
 # Automation Configuration
 automation:
   skip_confirmations: false
   auto_reboot: false
-  backup_configs: true
-  log_level: "info"
+  continue_on_error: false
+  log_level: "3"
+  debug: false

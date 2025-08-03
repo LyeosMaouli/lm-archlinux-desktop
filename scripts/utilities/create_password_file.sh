@@ -5,11 +5,30 @@
 set -euo pipefail
 
 # Load common functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../internal/common.sh" || {
-    echo "Error: Cannot load common.sh"
+if [[ -z "${SCRIPT_DIR:-}" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+# Try multiple paths for common.sh to handle different execution contexts
+COMMON_PATHS=(
+    "$SCRIPT_DIR/../internal/common.sh"        # When SCRIPT_DIR is utilities/
+    "$SCRIPT_DIR/internal/common.sh"           # When SCRIPT_DIR is scripts/
+    "$SCRIPT_DIR/../scripts/internal/common.sh" # When in project root
+)
+
+COMMON_LOADED=false
+for COMMON_PATH in "${COMMON_PATHS[@]}"; do
+    if [[ -f "$COMMON_PATH" ]]; then
+        # shellcheck source=../internal/common.sh
+        source "$COMMON_PATH" && COMMON_LOADED=true && break
+    fi
+done
+
+if [[ "${COMMON_LOADED:-}" != "true" ]]; then
+    echo "Error: Cannot load common.sh from any expected location" >&2
+    echo "Tried paths: ${COMMON_PATHS[*]}" >&2
     exit 1
-}
+fi
 
 # Script configuration
 SECURITY_DIR="$SCRIPT_DIR/../security"
@@ -538,7 +557,7 @@ EOF
     echo -e "1. Keep the password file secure: ${YELLOW}$OUTPUT_FILE${NC}"
     echo "2. Remember your encryption passphrase"
     echo "3. Use with deployment:"
-    echo -e "   ${YELLOW}./zero_touch_deploy.sh --password-mode file --password-file $OUTPUT_FILE${NC}"
+    echo -e "   ${YELLOW}./scripts/deploy.sh full --password file --password-file $OUTPUT_FILE${NC}"
     echo
     echo -e "${YELLOW}[WARNING]  Security Reminder:${NC}"
     echo "- Store the password file securely"

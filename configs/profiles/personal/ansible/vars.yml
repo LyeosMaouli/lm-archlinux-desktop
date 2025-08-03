@@ -1,20 +1,20 @@
 ---
-# Personal Profile Configuration
-# Multimedia-focused configuration for personal use
+# personal Profile Configuration
+# Generated from deploy-config/deploy.conf - DO NOT EDIT MANUALLY
 
 profile_name: "personal"
 profile_type: "PERSONAL"
 
 # System Configuration
 system:
-  hostname: "phoenix-personal"
-  timezone: "Europe/Paris"
+  hostname: "personal-system"
+  timezone: "UTC"
   locale: "en_US.UTF-8"
-  keymap: "fr"
+  keymap: "us"
 
-# User Configuration
+# User Configuration  
 user:
-  username: "{{ user_username | default('user') }}"
+  username: "personaluser"
   shell: "/bin/bash"
   groups:
     - wheel
@@ -22,107 +22,57 @@ user:
     - video
     - network
     - storage
-    - games
 
 # Desktop Configuration
 desktop:
   environment: "hyprland"
+  display_manager: "sddm"
   theme: "catppuccin-mocha"
-  auto_login: true  # Convenience for personal use
-  wallpaper: "nature-landscape"
+  auto_login: false
 
-# Package Configuration
-packages:
-  mirrors:
-    protocol: "https"
-    age: 12
-  aur:
-    helper: "yay"
-    packages:
-      - visual-studio-code-bin
-      - discord
-      - spotify
-      - steam
-      - lutris
-      - vlc
-      - gimp
-      - blender
-      - obs-studio
-      - firefox
-      - chromium
-
-# Security Configuration (Balanced)
+# Security Configuration
 security:
   firewall:
     enabled: true
     default_policy: "deny"
-    allow_ssh: false  # Personal use, SSH not needed
   fail2ban:
     enabled: true
-    ssh_protection: false
-    aggressive_mode: false
   audit:
     enabled: true
-    rules: "basic"
   ssh:
     port: 22
-    password_auth: true
+    password_auth: false
     root_login: false
+    key_types: ["ed25519"]
 
-# Power Management (Performance oriented)
-power_management:
-  enabled: true
-  tlp_enabled: true
-  cpu_governor_ac: "performance"
-  cpu_governor_battery: "ondemand"
-  wifi_powersave: false
-  usb_autosuspend: false
-
-# Development Tools (Personal projects)
+# Development Configuration
 development:
   git:
-    username: "Lyeos Maouli"
-    email: "lyeos.personal@gmail.com"
+    username: "Personal User"
+    email: "personal@example.com"
   ssh_keys:
     generate: true
     type: "ed25519"
-  tools:
-    - neovim
-    - tmux
-    - htop
-    - tree
+  tools_enabled: true
 
-# Personal applications
-personal_apps:
-  multimedia:
-    - vlc
-    - mpv
-    - gimp
-    - inkscape
-    - blender
-    - audacity
-  gaming:
-    - steam
-    - lutris
-    - wine
-    - gamemode
-  productivity:
-    - libreoffice-fresh
-    - thunderbird
-    - firefox
-    - chromium
+# Hardware Configuration
+hardware:
+  bootloader: "systemd-boot"
+  filesystem: "ext4"
+  encryption: true
+  bluetooth: true
+  printing: true
 
-# Gaming configuration
-gaming:
-  steam_enabled: true
-  lutris_enabled: true
-  gamemode_enabled: true
-  mesa_drivers: true
-  vulkan_support: true
+# Package Configuration
+packages:
+  aur_enabled: true
+  custom_packages: ""
+  parallel_downloads: 5
 
 # Automation Configuration
 automation:
-  skip_confirmations: true  # More automated for personal use
+  skip_confirmations: false
   auto_reboot: false
-  backup_configs: true
-  log_level: "info"
+  continue_on_error: false
+  log_level: "3"
+  debug: false

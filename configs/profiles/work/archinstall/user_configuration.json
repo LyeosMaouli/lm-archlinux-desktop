@@ -1,7 +1,7 @@
 {
     "!users": [
         {
-            "username": "{{USERNAME}}",
+            "username": "lyeosmaouli",
             "!password": null,
             "sudo": true
         }
@@ -17,7 +17,7 @@
         "config_type": "manual_partitioning",
         "device_modifications": []
     },
-    "hostname": "phoenix-work",
+    "hostname": "phoenix",
     "kernels": [
         "linux",
         "linux-lts"
@@ -53,10 +53,7 @@
         "htop",
         "curl",
         "wget",
-        "tmux",
-        "fail2ban",
-        "ufw",
-        "audit"
+        "tmux"
     ],
     "parallel downloads": 5,
     "profile_config": null,
